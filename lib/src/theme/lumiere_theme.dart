@@ -1,107 +1,67 @@
 import 'package:flutter/material.dart';
 
 import '../tokens/lumiere_tokens.dart';
+import '../tokens/tokens.g.dart';
 
-/// Densidad de la interfaz.
+/// Entry point of the design system theme.
 ///
-/// Hoy solo existe la estandar (decision acordada: una sola densidad al
-/// principio). El tipo existe para que añadir `compact` mas adelante sea un
-/// cambio de datos, no de API.
-enum LumiereDensity { standard }
-
-/// Extension de tema que publica los tokens a traves del `ThemeData`.
+/// Maps the design tokens onto [ThemeData] so stock Material widgets inherit the
+/// same identity, and publishes [LumiereTokens] as a theme extension for the
+/// components of this package.
 ///
-/// Los componentes leen de aqui y no de constantes globales: asi el mismo
-/// componente sirve para cualquier juego de tokens, y el cambio de tema o de
-/// densidad no obliga a ramificar codigo.
-@immutable
-class LumiereTheme extends ThemeExtension<LumiereTheme> {
-  const LumiereTheme({
-    required this.tokens,
-    this.density = LumiereDensity.standard,
-  });
-
-  final LumiereTokens tokens;
-  final LumiereDensity density;
-
-  /// Devuelve la extension activa.
-  ///
-  /// Si falta, falla en modo debug con un mensaje que dice que hacer en vez de
-  /// devolver valores silenciosamente equivocados.
-  static LumiereTheme of(BuildContext context) {
-    final LumiereTheme? extension = Theme.of(context).extension<LumiereTheme>();
-    assert(
-      extension != null,
-      'Falta LumiereTheme en el ThemeData. Construye el tema con '
-      'LumiereThemeData.dark() o LumiereThemeData.light().',
-    );
-    return extension ?? LumiereTheme(tokens: LumiereTokens.provisional());
-  }
-
-  @override
-  LumiereTheme copyWith({LumiereTokens? tokens, LumiereDensity? density}) =>
-      LumiereTheme(
-        tokens: tokens ?? this.tokens,
-        density: density ?? this.density,
-      );
-
-  @override
-  LumiereTheme lerp(ThemeExtension<LumiereTheme>? other, double t) {
-    if (other is! LumiereTheme) {
-      return this;
-    }
-    return LumiereTheme(
-      tokens: tokens.lerpTo(other.tokens, t),
-      density: t < 0.5 ? density : other.density,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      other is LumiereTheme && other.tokens == tokens && other.density == density;
-
-  @override
-  int get hashCode => Object.hash(tokens, density);
-}
-
-/// Punto de entrada del tema del sistema.
-///
-/// Mapea los tokens a `ThemeData` para que los widgets de stock tambien hereden
-/// la identidad visual, y registra [LumiereTheme] como extension.
+/// Material's `visualDensity` is deliberately left at its default: control sizes
+/// are decided by the design tokens, not by Material. A theme-level density
+/// would silently shrink every token-driven control.
 abstract final class LumiereThemeData {
-  static ThemeData dark({LumiereTokens? tokens}) =>
-      _build(tokens ?? LumiereTokens.provisional(), Brightness.dark);
+  /// Dark theme, the default of the product.
+  static ThemeData dark() => _build(LumiereColors.dark, Brightness.dark);
 
-  static ThemeData light({LumiereTokens? tokens}) =>
-      _build(tokens ?? LumiereTokens.provisional(), Brightness.light);
+  /// Light theme.
+  static ThemeData light() => _build(LumiereColors.light, Brightness.light);
 
-  static ThemeData _build(LumiereTokens tokens, Brightness brightness) {
-    final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: tokens.colors.accent,
-      brightness: brightness,
-    ).copyWith(
-      primary: tokens.colors.accent,
-      surface: tokens.colors.surfaceBase,
-      onSurface: tokens.colors.textPrimary,
-      onSurfaceVariant: tokens.colors.textSecondary,
-      outlineVariant: tokens.colors.borderSubtle,
-    );
+  static ThemeData _build(LumiereColors colors, Brightness brightness) {
+    final ColorScheme scheme =
+        ColorScheme.fromSeed(
+          seedColor: colors.accent.normal,
+          brightness: brightness,
+        ).copyWith(
+          primary: colors.accent.normal,
+          onPrimary: colors.textOnAccent,
+          error: colors.danger.normal,
+          onError: colors.textOnAccent,
+          surface: colors.surfaceBase,
+          onSurface: colors.textPrimary,
+          onSurfaceVariant: colors.textSecondary,
+          outlineVariant: colors.borderSubtle,
+        );
+
+    TextStyle style(double size, FontWeight weight) => TextStyle(
+          fontFamily: ArcoType.fontFamily,
+          fontSize: size,
+          height:
+              (ArcoType.lineHeightFor(size) ?? size * 1.4) / size,
+          fontWeight: weight,
+          color: colors.textPrimary,
+        );
 
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
-      scaffoldBackgroundColor: tokens.colors.surfaceBase,
-      canvasColor: tokens.colors.surfaceBase,
-      dividerColor: tokens.colors.borderSubtle,
+      scaffoldBackgroundColor: colors.surfaceBase,
+      canvasColor: colors.surfaceContainer,
+      dividerColor: colors.borderSubtle,
       textTheme: TextTheme(
-        headlineSmall: tokens.typography.display,
-        titleMedium: tokens.typography.heading,
-        bodyMedium: tokens.typography.body,
-        labelMedium: tokens.typography.label,
+        headlineSmall: style(ArcoType.size24, FontWeight.w600),
+        titleLarge: style(ArcoType.size20, FontWeight.w600),
+        titleMedium: style(ArcoType.size16, FontWeight.w600),
+        bodyLarge: style(ArcoType.size16, FontWeight.w400),
+        bodyMedium: style(ArcoType.size14, FontWeight.w400),
+        bodySmall: style(ArcoType.size13, FontWeight.w400),
+        labelMedium: style(ArcoType.size12, FontWeight.w500),
       ),
       extensions: <ThemeExtension<dynamic>>[
-        LumiereTheme(tokens: tokens),
+        LumiereTokens(colors: colors, brightness: brightness),
       ],
     );
   }

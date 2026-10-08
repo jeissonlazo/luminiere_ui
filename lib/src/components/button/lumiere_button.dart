@@ -1,165 +1,355 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
-import '../../theme/lumiere_theme.dart';
 import '../../tokens/lumiere_tokens.dart';
+import '../../tokens/tokens.g.dart';
 
-/// Tamano del boton.
-enum LumiereButtonSize { small, medium, large }
-
-/// Variante visual del boton.
+/// Visual weight of the button.
 ///
-/// PROVISIONAL: los nombres y el numero de variantes deben confirmarse contra el
-/// contrato real del componente `Button` en Figma antes de congelar la API.
-/// Cambiarlos despues es un cambio de datos en este enum, no una reescritura.
-enum LumiereButtonVariant { primary, secondary, ghost, danger }
+/// Mirrors the `类型` axis of the `Button` component set in the design file:
+/// `主要按钮 / 次要按钮 / 虚框按钮 / 线框按钮 / 文本按钮`.
+enum LumiereButtonType {
+  /// Filled with the ramp's normal colour.
+  primary,
 
-/// Boton del sistema de diseno.
+  /// Neutral translucent fill.
+  secondary,
+
+  /// Transparent with a dashed outline.
+  dashed,
+
+  /// Transparent with a solid outline.
+  outline,
+
+  /// No fill and no outline.
+  text,
+}
+
+/// Semantic colour of the button.
 ///
-/// Nota de arquitectura: el contrato de Figma declara un estado `State` como
-/// variante, pero en Flutter hover, foco, pulsado y deshabilitado **no son
-/// props**: son estados reales del widget. Solo `Loading` se modela como prop
-/// ([isLoading]). Mapear la variante de diseno a estados reales evita una API
-/// que se pueda contradecir a si misma.
+/// Mirrors the `种类` axis: `标准 / 危险 / 警告 / 成功`.
+enum LumiereButtonKind { standard, danger, warning, success }
+
+/// Corner treatment and box proportion.
+///
+/// Mirrors the `形状` axis: `长方形 / 全圆角 / 方形 / 圆形`. Note that this axis
+/// covers two things at once: how round the corners are, and whether the box is
+/// free-width (text buttons) or square (icon-only buttons).
+enum LumiereButtonShape {
+  /// Free width, small radius.
+  rectangle,
+
+  /// Free width, fully rounded.
+  pill,
+
+  /// Square box, small radius. For icon-only buttons.
+  square,
+
+  /// Circular box. For icon-only buttons.
+  circle,
+}
+
+/// Control height. Mirrors the `尺寸` axis: `大 / 中 / 小 / 迷你`.
+enum LumiereButtonSize { large, medium, small, mini }
+
+/// Button of the design system.
+///
+/// The design declares a `状态` (state) axis with `默认 / 悬停 / 聚焦 / 激活 /
+/// 禁用`. Those are **real widget states** in Flutter rather than properties, so
+/// this widget resolves them through [WidgetStateProperty] instead of asking the
+/// caller to pass them; passing them would let a caller describe a state the
+/// widget is not actually in. `loading` is the only state that cannot be
+/// expressed that way, so it stays a property.
+///
+/// Pending verification against the design file: the horizontal padding per size.
+/// The variables export carries no padding tokens, so it is derived from the
+/// spacing scale ([ArcoSpace]) until the component geometry is extracted.
 class LumiereButton extends StatelessWidget {
   const LumiereButton({
     super.key,
     required this.label,
     this.onPressed,
+    this.type = LumiereButtonType.primary,
+    this.kind = LumiereButtonKind.standard,
+    this.shape = LumiereButtonShape.rectangle,
     this.size = LumiereButtonSize.medium,
-    this.variant = LumiereButtonVariant.primary,
     this.leadingIcon,
+    this.trailingIcon,
     this.isLoading = false,
+    this.isFullWidth = false,
   });
 
-  /// Texto visible y, por tanto, etiqueta accesible del boton.
+  /// Visible label, and therefore the accessible name of the button.
   final String label;
 
-  /// `null` deja el boton deshabilitado.
+  /// `null` leaves the button disabled.
   final VoidCallback? onPressed;
 
+  final LumiereButtonType type;
+  final LumiereButtonKind kind;
+  final LumiereButtonShape shape;
   final LumiereButtonSize size;
-  final LumiereButtonVariant variant;
 
-  /// Icono decorativo previo a la etiqueta. Se oculta a lectores de pantalla.
+  /// Decorative icon before the label; hidden from screen readers.
   final Widget? leadingIcon;
 
-  /// Estado de carga: muestra progreso y bloquea la interaccion.
+  /// Decorative icon after the label; hidden from screen readers.
+  final Widget? trailingIcon;
+
+  /// Shows progress and blocks interaction.
   final bool isLoading;
+
+  /// Stretches the button to the available width.
+  final bool isFullWidth;
 
   bool get _isEnabled => onPressed != null && !isLoading;
 
-  double _height(LumiereTokens tokens) => switch (size) {
-        LumiereButtonSize.small => tokens.controlHeightSmall,
-        LumiereButtonSize.medium => tokens.controlHeightMedium,
-        LumiereButtonSize.large => tokens.controlHeightLarge,
+  bool get _isSquare =>
+      shape == LumiereButtonShape.square || shape == LumiereButtonShape.circle;
+
+  LumiereRamp get _ramp => switch (kind) {
+        LumiereButtonKind.standard => LumiereRamp.accent,
+        LumiereButtonKind.danger => LumiereRamp.danger,
+        LumiereButtonKind.warning => LumiereRamp.warning,
+        LumiereButtonKind.success => LumiereRamp.success,
       };
 
-  Color _background(Set<WidgetState> states, LumiereColors colors) {
-    if (states.contains(WidgetState.disabled)) {
-      return variant == LumiereButtonVariant.ghost
-          ? const Color(0x00000000)
-          : colors.surfaceRaised;
-    }
-    return switch (variant) {
-      LumiereButtonVariant.primary => colors.accent,
-      LumiereButtonVariant.secondary => colors.surfaceRaised,
-      LumiereButtonVariant.ghost => const Color(0x00000000),
-      LumiereButtonVariant.danger => colors.textPrimary,
-    };
-  }
+  double get _height => switch (size) {
+        LumiereButtonSize.large => ArcoControl.heightLarge,
+        LumiereButtonSize.medium => ArcoControl.heightMedium,
+        LumiereButtonSize.small => ArcoControl.heightSmall,
+        LumiereButtonSize.mini => ArcoControl.heightMini,
+      };
 
-  Color _foreground(Set<WidgetState> states, LumiereColors colors) {
-    if (states.contains(WidgetState.disabled)) {
-      return colors.textSecondary;
-    }
-    return switch (variant) {
-      LumiereButtonVariant.primary => colors.surfaceBase,
-      LumiereButtonVariant.secondary => colors.textPrimary,
-      LumiereButtonVariant.ghost => colors.textPrimary,
-      LumiereButtonVariant.danger => colors.surfaceBase,
-    };
-  }
+  double get _radius => switch (shape) {
+        LumiereButtonShape.rectangle || LumiereButtonShape.square =>
+          ArcoRadius.radiusSm,
+        LumiereButtonShape.pill || LumiereButtonShape.circle =>
+          ArcoRadius.radiusFull,
+      };
 
-  BorderSide? _side(Set<WidgetState> states, LumiereColors colors, LumiereTokens tokens) {
-    if (variant == LumiereButtonVariant.ghost) {
-      return BorderSide.none;
-    }
-    if (states.contains(WidgetState.focused)) {
-      return BorderSide(color: colors.accent, width: tokens.focusRingWidth);
-    }
-    return BorderSide(color: colors.borderSubtle);
-  }
+  double get _horizontalPadding => switch (size) {
+        LumiereButtonSize.large || LumiereButtonSize.medium => ArcoSpace.spaceMd,
+        LumiereButtonSize.small || LumiereButtonSize.mini => ArcoSpace.spaceSm,
+      };
+
+  bool get _hasOutline =>
+      type == LumiereButtonType.outline || type == LumiereButtonType.dashed;
 
   @override
   Widget build(BuildContext context) {
-    final LumiereTokens tokens = LumiereTheme.of(context).tokens;
-    final LumiereColors colors = tokens.colors;
-    final double height = _height(tokens);
+    final LumiereTokens tokens = LumiereTokens.of(context);
+    final LumiereStatusColors ramp = tokens.colors.rampFor(_ramp);
+    final double height = _height;
 
-    return TextButton(
+    Widget button = TextButton(
       onPressed: _isEnabled ? onPressed : null,
-      style: ButtonStyle(
-        minimumSize: WidgetStatePropertyAll<Size>(Size(0, height)),
-        // La densidad la deciden los tokens, no Material: si el tema de la
-        // aplicacion trae otra `visualDensity`, el control no debe encogerse ni
-        // crecer por debajo de la altura del token.
-        visualDensity: VisualDensity.standard,
-        padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
-          EdgeInsets.symmetric(horizontal: tokens.spacing.sm),
+      style: _style(tokens, ramp, height),
+      child: _content(tokens, ramp, height),
+    );
+
+    if (type == LumiereButtonType.dashed) {
+      button = CustomPaint(
+        foregroundPainter: _DashedBorderPainter(
+          color: _isEnabled ? ramp.normal : ramp.disabled,
+          radius: _radius >= height ? height / 2 : _radius,
+          strokeWidth: 1,
         ),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        elevation: const WidgetStatePropertyAll<double>(0),
-        shape: WidgetStatePropertyAll<OutlinedBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tokens.radii.sm),
-          ),
-        ),
-        textStyle: WidgetStatePropertyAll<TextStyle>(tokens.typography.label),
-        backgroundColor: WidgetStateProperty.resolveWith<Color>(
-          (Set<WidgetState> states) => _background(states, colors),
-        ),
-        foregroundColor: WidgetStateProperty.resolveWith<Color>(
-          (Set<WidgetState> states) => _foreground(states, colors),
-        ),
-        side: WidgetStateProperty.resolveWith<BorderSide?>(
-          (Set<WidgetState> states) => _side(states, colors, tokens),
-        ),
-        overlayColor: WidgetStatePropertyAll<Color>(
-          colors.textPrimary.withValues(alpha: 0.08),
+        child: button,
+      );
+    }
+
+    if (_isSquare) {
+      return SizedBox(width: height, height: height, child: button);
+    }
+    return isFullWidth ? SizedBox(width: double.infinity, child: button) : button;
+  }
+
+  ButtonStyle _style(
+    LumiereTokens tokens,
+    LumiereStatusColors ramp,
+    double height,
+  ) {
+    final LumiereColors colors = tokens.colors;
+
+    Color background(Set<WidgetState> states) {
+      final bool disabled = states.contains(WidgetState.disabled);
+      if (disabled) {
+        return switch (type) {
+          LumiereButtonType.primary => ramp.disabled,
+          LumiereButtonType.secondary => colors.fillSubtle,
+          LumiereButtonType.dashed ||
+          LumiereButtonType.outline ||
+          LumiereButtonType.text =>
+            Colors.transparent,
+        };
+      }
+      return switch (type) {
+        LumiereButtonType.primary => states.contains(WidgetState.pressed)
+            ? ramp.active
+            : states.contains(WidgetState.hovered)
+                ? ramp.hover
+                : ramp.normal,
+        LumiereButtonType.secondary => states.contains(WidgetState.pressed)
+            ? colors.fillHeavy
+            : states.contains(WidgetState.hovered)
+                ? colors.fillStrong
+                : colors.fillDefault,
+        LumiereButtonType.dashed ||
+        LumiereButtonType.outline ||
+        LumiereButtonType.text =>
+          Colors.transparent,
+      };
+    }
+
+    Color foreground(Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
+        return type == LumiereButtonType.primary
+            ? colors.textOnAccent
+            : ramp.textDisabled;
+      }
+      return type == LumiereButtonType.primary
+          ? colors.textOnAccent
+          : states.contains(WidgetState.hovered)
+              ? ramp.hover
+              : ramp.normal;
+    }
+
+    return ButtonStyle(
+      minimumSize: WidgetStatePropertyAll<Size>(Size(0, height)),
+      // Control sizes come from the tokens, never from Material's density.
+      visualDensity: VisualDensity.standard,
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      elevation: const WidgetStatePropertyAll<double>(0),
+      padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
+        EdgeInsets.symmetric(horizontal: _isSquare ? 0 : _horizontalPadding),
+      ),
+      shape: WidgetStatePropertyAll<OutlinedBorder>(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radius)),
+      ),
+      textStyle: WidgetStatePropertyAll<TextStyle>(
+        tokens.text(
+          size: size == LumiereButtonSize.large
+              ? ArcoType.size16
+              : ArcoType.size14,
+          weight: FontWeight.w400,
         ),
       ),
-      child: _buildContent(colors, height),
+      backgroundColor: WidgetStateProperty.resolveWith<Color>(background),
+      foregroundColor: WidgetStateProperty.resolveWith<Color>(foreground),
+      overlayColor: WidgetStatePropertyAll<Color>(colors.fillDefault),
+      side: _hasOutline
+          ? WidgetStateProperty.resolveWith<BorderSide?>(
+              (Set<WidgetState> states) => type == LumiereButtonType.dashed
+                  ? BorderSide.none
+                  : BorderSide(
+                      color: states.contains(WidgetState.disabled)
+                          ? ramp.disabled
+                          : ramp.normal,
+                    ),
+            )
+          : const WidgetStatePropertyAll<BorderSide?>(BorderSide.none),
     );
   }
 
-  Widget _buildContent(LumiereColors colors, double height) {
-    final double iconSize = height * 0.5;
+  Widget _content(
+    LumiereTokens tokens,
+    LumiereStatusColors ramp,
+    double height,
+  ) {
+    final double iconSize =
+        size == LumiereButtonSize.large ? ArcoType.size20 : ArcoType.size16;
+    final Color iconColor = _isEnabled ? ramp.normal : ramp.textDisabled;
+
     if (isLoading) {
       return SizedBox(
         width: iconSize,
         height: iconSize,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(colors.textSecondary),
+          valueColor: AlwaysStoppedAnimation<Color>(iconColor),
         ),
       );
     }
-    if (leadingIcon == null) {
+
+    if (leadingIcon == null && trailingIcon == null) {
       return Text(label);
     }
+
+    Widget icon(Widget widget) => ExcludeSemantics(
+          child: IconTheme.merge(
+            data: IconThemeData(size: iconSize, color: iconColor),
+            child: widget,
+          ),
+        );
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        // Decorativo: el nombre accesible lo aporta la etiqueta.
-        ExcludeSemantics(
-          child: IconTheme.merge(
-            data: IconThemeData(size: iconSize, color: colors.textSecondary),
-            child: leadingIcon!,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(label),
+        if (leadingIcon != null) ...<Widget>[
+          icon(leadingIcon!),
+          if (label.isNotEmpty) SizedBox(width: ArcoSpace.spaceXs),
+        ],
+        if (label.isNotEmpty) Text(label),
+        if (trailingIcon != null) ...<Widget>[
+          if (label.isNotEmpty) SizedBox(width: ArcoSpace.spaceXs),
+          icon(trailingIcon!),
+        ],
       ],
     );
   }
+}
+
+/// Draws a dashed rounded border.
+///
+/// Flutter's [BorderSide] cannot express a dash pattern, so dashed outlines need
+/// their own painter. This is one of the cases where a design system component
+/// has to do real drawing instead of styling a Material widget.
+class _DashedBorderPainter extends CustomPainter {
+  const _DashedBorderPainter({
+    required this.color,
+    required this.radius,
+    required this.strokeWidth,
+  });
+
+  final Color color;
+  final double radius;
+  final double strokeWidth;
+
+  /// Dash and gap lengths of the outline. Not design tokens: the variables
+  /// export carries no dash pattern for the dashed button type.
+  static const double _dashLength = 4;
+  static const double _gapLength = 3;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Path path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset.zero & size,
+          Radius.circular(radius),
+        ),
+      );
+    final Paint paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    for (final ui.PathMetric metric in path.computeMetrics()) {
+      double distance = 0;
+      while (distance < metric.length) {
+        final double next = math.min(distance + _dashLength, metric.length);
+        canvas.drawPath(metric.extractPath(distance, next), paint);
+        distance = next + _gapLength;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedBorderPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.radius != radius ||
+      oldDelegate.strokeWidth != strokeWidth;
 }

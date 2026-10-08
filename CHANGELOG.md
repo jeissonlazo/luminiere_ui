@@ -1,25 +1,52 @@
 # Changelog
 
-Formato basado en Keep a Changelog; versionado semantico.
+All notable changes to this package are documented here.
+Format based on Keep a Changelog; versioning follows Semantic Versioning.
+
+## 0.2.0
+
+### Changed (breaking)
+
+- Token layer rebuilt from the real design file instead of the provisional
+  placeholder values. The generated layer now carries 396 colour constants
+  (palette, semantic ramps and component tokens) for both modes.
+- Type scale replaced by the one the design declares: `Nunito Sans` at 10, 12,
+  13, 14, 16, 20, 24, 36, 48 and 56 px with their paired line heights.
+- Spacing scale is now the one the `Space` component declares: 4 / 8 / 16 / 24.
+- Radius scale measured from the file: 2 / 4 / 8 plus full rounding.
+- `LumiereTheme` was renamed to `LumiereTokens` and now carries the semantic
+  colour roles and the brightness.
+- `LumiereButton` now mirrors the five axes the design declares (`type`, `kind`,
+  `shape`, `size` and real widget states) instead of a single variant enum.
+- All identifiers and documentation are in English.
+
+### Added
+
+- `LumiereColors` and `LumiereStatusColors`: semantic roles mapped from the
+  descriptions the design file gives to each token.
+- `ArcoType`, `ArcoSpace`, `ArcoRadius`, `ArcoControl` as the public,
+  mode-independent scales.
+- Dashed border support for the `dashed` button type, which Flutter's
+  `BorderSide` cannot express.
+- `LumiereThemeData.light()`.
+
+### Removed
+
+- The provisional token values and the `LumiereDensity` type. Density is decided
+  by the tokens; Material's `visualDensity` is left at its default so it cannot
+  silently resize token-driven controls.
 
 ## 0.1.0
 
-### Anadido
+### Added
 
-- Estructura del paquete independiente: punto de entrada unico
-  (`package:lumiere_ui/lumiere_ui.dart`) y `src/` como implementacion.
-- `LumiereTokens` con escalas cerradas de espaciado y radios, colores
-  semanticos, roles tipograficos y alturas de control.
-- `LumiereTheme` como `ThemeExtension` y `LumiereThemeData.dark()` /
-  `LumiereThemeData.light()`.
-- `LumiereButton` como componente de referencia, con tamanos, variantes, icono
-  previo, estado de carga, foco visible y nombre accesible.
-- Pruebas de comportamiento y golden de variantes, estados y tamanos.
+- First version of the package: single public entry point, `LumiereTokens` as a
+  `ThemeExtension`, `LumiereThemeData.dark()` and a reference `Button`
+  component with sizes, variants, leading icon, loading state, visible focus and
+  an accessible name.
+- Behaviour tests and a golden covering variants, states and sizes.
 
-### Notas
+### Notes
 
-- Los valores de `tokens.g.dart` son **provisionales** y no provienen de Arco:
-  Figma no es accesible todavia. Se sustituyen con
-  `node tools/generate-tokens.mjs`.
-- La API de `LumiereButton` (nombres y numero de variantes) queda marcada como
-  provisional hasta confirmar el contrato real del componente en Figma.
+- Token values in this version were **provisional**: Figma was not accessible
+  yet, so they did not come from the design file.

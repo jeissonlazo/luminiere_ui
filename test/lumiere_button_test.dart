@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lumiere_ui/lumiere_ui.dart';
+// White-box import: these tests verify that the semantic layer really points at
+// the primitives measured from the design file, so they need the raw layer.
+import 'package:lumiere_ui/src/tokens/tokens.g.dart';
 
 Widget _host(Widget child) => MaterialApp(
       theme: LumiereThemeData.dark(),
@@ -9,10 +12,10 @@ Widget _host(Widget child) => MaterialApp(
 
 void main() {
   group('LumiereButton', () {
-    testWidgets('invoca onPressed al pulsar', (WidgetTester tester) async {
+    testWidgets('calls onPressed when tapped', (WidgetTester tester) async {
       int taps = 0;
       await tester.pumpWidget(
-        _host(LumiereButton(label: 'Guardar', onPressed: () => taps++)),
+        _host(LumiereButton(label: 'Save', onPressed: () => taps++)),
       );
 
       await tester.tap(find.byType(LumiereButton));
@@ -20,21 +23,22 @@ void main() {
       expect(taps, 1);
     });
 
-    testWidgets('queda deshabilitado cuando onPressed es null',
+    testWidgets('is disabled when onPressed is null',
         (WidgetTester tester) async {
-      await tester.pumpWidget(_host(const LumiereButton(label: 'Guardar')));
+      await tester.pumpWidget(_host(const LumiereButton(label: 'Save')));
 
-      final TextButton button = tester.widget<TextButton>(find.byType(TextButton));
+      final TextButton button =
+          tester.widget<TextButton>(find.byType(TextButton));
 
       expect(button.onPressed, isNull);
     });
 
-    testWidgets('isLoading bloquea la interaccion y muestra progreso',
+    testWidgets('isLoading blocks interaction and shows progress',
         (WidgetTester tester) async {
       int taps = 0;
       await tester.pumpWidget(
         _host(LumiereButton(
-          label: 'Guardar',
+          label: 'Save',
           isLoading: true,
           onPressed: () => taps++,
         )),
@@ -46,89 +50,168 @@ void main() {
       expect(taps, 0);
     });
 
-    testWidgets('expone su etiqueta como nombre accesible',
+    testWidgets('exposes its label as the accessible name',
         (WidgetTester tester) async {
       await tester.pumpWidget(
-        _host(LumiereButton(label: 'Guardar', onPressed: () {})),
+        _host(LumiereButton(label: 'Save', onPressed: () {})),
       );
 
-      expect(find.bySemanticsLabel('Guardar'), findsOneWidget);
+      expect(find.bySemanticsLabel('Save'), findsOneWidget);
     });
 
-    testWidgets('el icono previo es decorativo y no ensucia el nombre accesible',
+    testWidgets('keeps decorative icons out of the accessible name',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         _host(LumiereButton(
-          label: 'Guardar',
+          label: 'Save',
           leadingIcon: const Icon(Icons.save),
+          trailingIcon: const Icon(Icons.arrow_forward),
           onPressed: () {},
         )),
       );
 
-      expect(find.bySemanticsLabel('Guardar'), findsOneWidget);
+      expect(find.bySemanticsLabel('Save'), findsOneWidget);
     });
 
-    testWidgets('los tamanos respetan las alturas de los tokens',
+    testWidgets('uses the control heights of the design tokens',
         (WidgetTester tester) async {
-      final LumiereTokens tokens = LumiereTokens.provisional();
+      await tester.pumpWidget(_host(
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            for (final LumiereButtonSize size in LumiereButtonSize.values)
+              LumiereButton(
+                label: size.name,
+                size: size,
+                onPressed: () {},
+              ),
+          ],
+        ),
+      ));
+
+      const Map<LumiereButtonSize, double> expected = <LumiereButtonSize, double>{
+        LumiereButtonSize.large: ArcoControl.heightLarge,
+        LumiereButtonSize.medium: ArcoControl.heightMedium,
+        LumiereButtonSize.small: ArcoControl.heightSmall,
+        LumiereButtonSize.mini: ArcoControl.heightMini,
+      };
+
+      expected.forEach((LumiereButtonSize size, double height) {
+        expect(
+          tester.getSize(find.widgetWithText(LumiereButton, size.name)).height,
+          height,
+          reason: 'height of $size',
+        );
+      });
+    });
+
+    testWidgets('square and circle shapes render a square box',
+        (WidgetTester tester) async {
       await tester.pumpWidget(_host(
         Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             LumiereButton(
-              label: 'S',
-              size: LumiereButtonSize.small,
+              label: '',
+              shape: LumiereButtonShape.square,
+              leadingIcon: const Icon(Icons.add),
               onPressed: () {},
             ),
             LumiereButton(
-              label: 'M',
-              size: LumiereButtonSize.medium,
-              onPressed: () {},
-            ),
-            LumiereButton(
-              label: 'L',
-              size: LumiereButtonSize.large,
+              label: '',
+              shape: LumiereButtonShape.circle,
+              leadingIcon: const Icon(Icons.add),
               onPressed: () {},
             ),
           ],
         ),
       ));
 
-      expect(
-        tester.getSize(find.widgetWithText(LumiereButton, 'S')).height,
-        tokens.controlHeightSmall,
-      );
-      expect(
-        tester.getSize(find.widgetWithText(LumiereButton, 'M')).height,
-        tokens.controlHeightMedium,
-      );
-      expect(
-        tester.getSize(find.widgetWithText(LumiereButton, 'L')).height,
-        tokens.controlHeightLarge,
-      );
+      final Size square =
+          tester.getSize(find.byType(LumiereButton).first);
+      expect(square.width, square.height);
+    });
+
+    testWidgets('every type, kind and shape renders without throwing',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(_host(
+        SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              for (final LumiereButtonType type in LumiereButtonType.values)
+                for (final LumiereButtonKind kind in LumiereButtonKind.values)
+                  LumiereButton(
+                    label: '${type.name}-${kind.name}',
+                    type: type,
+                    kind: kind,
+                    onPressed: () {},
+                  ),
+              for (final LumiereButtonShape shape
+                  in LumiereButtonShape.values)
+                LumiereButton(
+                  label: shape.name,
+                  shape: shape,
+                  onPressed: () {},
+                ),
+            ],
+          ),
+        ),
+      ));
+
+      expect(tester.takeException(), isNull);
     });
   });
 
   group('LumiereTokens', () {
-    test('la escala de espaciado es cerrada', () {
-      final LumiereTokens tokens = LumiereTokens.provisional();
+    test('the dark theme publishes its tokens through the extension', () {
+      final ThemeData theme = LumiereThemeData.dark();
 
-      expect(tokens.spacing.isOnScale(16), isTrue);
-      expect(tokens.spacing.isOnScale(7), isFalse);
+      expect(theme.extension<LumiereTokens>()!.colors, LumiereColors.dark);
     });
 
-    test('la escala de radios es cerrada', () {
-      final LumiereTokens tokens = LumiereTokens.provisional();
+    test('semantic roles point at the primitives measured from the file', () {
+      expect(LumiereColors.dark.surfaceBase, ArcoSemanticDark.bg1);
+      expect(LumiereColors.dark.textPrimary, ArcoSemanticDark.text1);
+      expect(LumiereColors.dark.accent.normal, ArcoSemanticDark.primary6);
+      expect(LumiereColors.dark.accent.hover, ArcoSemanticDark.primary5);
+      expect(LumiereColors.dark.accent.active, ArcoSemanticDark.primary7);
+      expect(LumiereColors.dark.accent.disabled, ArcoSemanticDark.primary3);
 
-      expect(tokens.radii.isOnScale(8), isTrue);
-      expect(tokens.radii.isOnScale(10), isFalse);
+      expect(LumiereColors.light.surfaceBase, ArcoSemanticLight.bg1);
+      expect(LumiereColors.light.accent.normal, ArcoSemanticLight.primary6);
     });
 
-    test('el tema publica la extension con los mismos tokens', () {
-      final LumiereTokens tokens = LumiereTokens.provisional();
-      final ThemeData theme = LumiereThemeData.dark(tokens: tokens);
+    test('the brand ramp differs between modes, as the file declares', () {
+      // The file customises the brand blue in dark mode and keeps Arco's
+      // original blue in light mode.
+      expect(
+        LumiereColors.dark.accent.normal,
+        isNot(LumiereColors.light.accent.normal),
+      );
+    });
 
-      expect(theme.extension<LumiereTheme>()!.tokens, tokens);
+    test('text styles take their line height from the design scale', () {
+      const LumiereTokens tokens = LumiereTokens(
+        colors: LumiereColors.dark,
+        brightness: Brightness.dark,
+      );
+
+      expect(tokens.text(size: ArcoType.size14).height, closeTo(22 / 14, 0.001));
+      expect(tokens.text(size: ArcoType.size16).height, closeTo(24 / 16, 0.001));
+      expect(tokens.text(size: 17).height, isNull);
+    });
+
+    test('the scales are the ones declared by the design file', () {
+      expect(ArcoSpace.spaceXs, 4);
+      expect(ArcoSpace.spaceSm, 8);
+      expect(ArcoSpace.spaceMd, 16);
+      expect(ArcoSpace.spaceLg, 24);
+
+      expect(ArcoRadius.radiusSm, 2);
+      expect(ArcoRadius.radiusMd, 4);
+      expect(ArcoRadius.radiusLg, 8);
+
+      expect(ArcoType.fontFamily, 'Nunito Sans');
     });
   });
 }

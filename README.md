@@ -1,28 +1,41 @@
 # lumiere_ui
 
-Sistema de diseno y biblioteca de componentes de **Lumiere**.
+Design system and component library for **Lumiere**.
 
-Es un paquete **independiente de la aplicacion**: no importa el editor, el
-viewport, el dominio ni `flutter_gpu`. Su unica entrada visual son los tokens y
-su unica salida son widgets. Se consume desde el workspace de la raiz:
+It is independent of the application: it never imports the editor, the viewport,
+the domain or `flutter_gpu`. Its only visual input is the token layer and its
+only output is widgets.
+
+## Install
 
 ```yaml
 dependencies:
-  lumiere_ui: ^0.1.0
+  lumiere_ui: ^0.2.0
 ```
 
-```dart
-import 'package:lumiere_ui/lumiere_ui.dart';
+Until the first release is published on pub.dev, consume it from the repository:
+
+```yaml
+dependencies:
+  lumiere_ui:
+    git:
+      url: https://github.com/jeissonlazo/luminiere_ui.git
+      ref: main
 ```
 
-## Uso
+Note that a git dependency is pinned in `pubspec.lock`: after pushing new commits
+you need `flutter pub upgrade lumiere_ui` to pick them up. To work on the package
+and the application at the same time, use `dependency_overrides` with a local
+path instead of pushing on every change.
+
+## Usage
 
 ```dart
 MaterialApp(
   theme: LumiereThemeData.dark(),
   home: Scaffold(
     body: LumiereButton(
-      label: 'Guardar',
+      label: 'Save',
       leadingIcon: const Icon(Icons.save),
       onPressed: _save,
     ),
@@ -30,72 +43,83 @@ MaterialApp(
 )
 ```
 
-Para inyectar otro juego de tokens (tema propio, densidad futura):
+## Token layers
 
-```dart
-LumiereThemeData.dark(tokens: misTokens)
-```
+Three layers, each with a different owner:
 
-## Estado de los tokens: PROVISIONAL
+1. **Primitives** - `ArcoPaletteDark/Light`, `ArcoSemanticDark/Light`,
+   `ArcoComponentDark/Light`. Generated from the Figma variables export.
+   Components never reference these directly.
+2. **Semantic roles** - `LumiereColors` and `LumiereStatusColors`. A hand-written
+   mapping from roles to primitives, taken from the descriptions the design file
+   itself attaches to each token. This is the only layer components read colours
+   from.
+3. **Scales** - `ArcoType`, `ArcoSpace`, `ArcoRadius`, `ArcoControl`.
+   Mode-independent constants.
 
-`lib/src/tokens/tokens.g.dart` **no contiene valores de Arco**. Figma sigue
-bloqueado por el limite del plan Starter (ver `docs/specs/001`, seccion 9), asi
-que ese archivo lleva un juego neutro provisional que solo existe para que la
-galeria y los goldens rendericen.
-
-- No son decisiones de diseno y no deben citarse como tokens `DS-*`.
-- El juego neutral no incluye color de marca: el acento es un gris a proposito.
-- La sustitucion es una sola orden, sin tocar codigo de componentes:
-
-  ```
-  node tools/generate-tokens.mjs docs/constraints/design-tokens.json
-  ```
-
-## Reglas del paquete
-
-1. **Cero literales visuales en los componentes.** Todo color, tamano, radio y
-   tipografia sale de `LumiereTokens` via `LumiereTheme.of(context).tokens`. El
-   unico archivo con valores es `tokens.g.dart`.
-2. **La direccion de dependencia es hacia dentro.** Este paquete no importa
-   nada de la aplicacion, y nunca importara `flutter_gpu`.
-3. **Punto de entrada unico.** La aplicacion importa solo
-   `package:lumiere_ui/lumiere_ui.dart`; `src/` no es API publica.
-4. **Los estados de diseno se mapean a estados reales.** Hover, foco, pulsado y
-   deshabilitado son estados del widget, no props. Solo lo que no existe como
-   estado real (por ejemplo `Loading`) se expone como prop.
-
-## Como anadir un componente
-
-1. Confirmar que existe en el contrato de Figma y con que variantes y estados.
-   Si el contrato no esta disponible, la API queda marcada **PROVISIONAL**.
-2. Crear `lib/src/components/<nombre>/<nombre>.dart` con la anatomia del
-   componente y **solo** tokens.
-3. Cubrir los estados: normal, hover, focus, pressed, disabled y loading si
-   aplica.
-4. Asegurar teclado y semantica: foco visible, operable con teclado, etiqueta
-   accesible, y que ningun estado dependa solo del color.
-5. Exportarlo en `lib/lumiere_ui.dart`.
-6. Prueba unitaria de comportamiento + **golden por variante y estado**. El
-   golden es la verificacion del contrato de diseno, no un extra.
-7. Darlo de alta en la galeria de la aplicacion (`features/theme_preview`).
-
-Si el componente es especifico del producto (fila de capa, previsualizacion de
-brocha, lista de canales), **no va aqui**: va en la feature correspondiente de la
-aplicacion y se compone con primitivas de este paquete.
-
-## Pruebas
+Regeneration lives in the Lumiere repository, which owns the design sources:
 
 ```powershell
-flutter test                        # unitarias + golden
-flutter test --update-goldens       # regenerar la linea base (revisar el diff)
+node tools/build-tokens.mjs
 ```
 
-## Independencia y publicacion
+## Where the values come from
 
-Hoy es independiente en el sentido que importa: pubspec propio, API publica
-propia, pruebas propias, version propia y cero dependencias de la aplicacion.
-Se resuelve dentro del workspace de la raiz, con un unico lockfile.
+| Layer | Source |
+| --- | --- |
+| Colour | Variables export of `Arco Design System lumimier` (Figma `E6OUz1aF3tykVnr341r6fl`) |
+| Type scale | Figma page `Basic styles` - family `Nunito Sans`, sizes 10 to 56 |
+| Spacing | The `Space` component declares 4 / 8 / 16 / 24 |
+| Radius | Measured `cornerRadius` usage: 2 dominates, then 8 and 4 - pending confirmation |
+| Control heights | Arco's published specification - **pending verification** against the file |
 
-Publicarlo en pub.dev es otro paso y **no es necesario todavia**. Cuando lo sea,
-haria falta: `LICENSE`, `repository`/`homepage`, quitar `publish_to: none`,
-disciplina de versionado semantico y `CHANGELOG` en cada cambio de API.
+Known open item: the horizontal padding per button size. The variables export
+carries no padding tokens, so it is derived from the spacing scale until the
+component geometry is extracted.
+
+## Component contract
+
+Every component mirrors the axes the design file declares. `Button` has five:
+
+| Axis | Values |
+| --- | --- |
+| `type` | primary, secondary, dashed, outline, text |
+| `kind` | standard, danger, warning, success |
+| `shape` | rectangle, pill, square, circle |
+| `size` | large, medium, small, mini |
+| `state` | default, hover, focus, active, disabled |
+
+State is deliberately **not** a property: default, hover, focus, active and
+disabled are real widget states in Flutter, so the component resolves them
+internally instead of letting a caller describe a state the widget is not in.
+`loading` is the only state that cannot be expressed that way, so it stays a
+property.
+
+## Adding a component
+
+1. Confirm it exists in the design file and list its axes and options. If the
+   contract is unavailable, mark the API as provisional.
+2. Create `lib/src/components/<name>/<name>.dart` using only semantic roles and
+   scales - no literals.
+3. Cover every state, make focus visible, guarantee keyboard operation and an
+   accessible name.
+4. Export it from `lib/lumiere_ui.dart`.
+5. Add behaviour tests and a **golden per variant and state**. The golden is the
+   verification of the design contract, not an extra.
+6. Register it in the application gallery.
+
+## Verification
+
+```powershell
+flutter analyze
+flutter test                  # behaviour + goldens
+flutter test --update-goldens # regenerate the baseline and review the diff
+```
+
+Goldens depend on the operating system's rasterisation, so they are tagged and
+excluded from CI (`--exclude-tags=golden`).
+
+## Licence
+
+MIT. The `Nunito Sans` typeface is **not** bundled: add it to the application
+from Google Fonts (SIL Open Font License).

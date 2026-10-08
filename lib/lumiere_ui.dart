@@ -1,16 +1,20 @@
-/// Sistema de diseno y biblioteca de componentes de Lumiere.
+/// Lumiere design system and component library.
 ///
-/// Este paquete **no conoce la aplicacion**: no importa el editor, el viewport,
-/// el dominio ni `flutter_gpu`. Su unica entrada visual son los tokens, y su
-/// unica salida son widgets.
+/// This package does not know the application: it never imports the editor, the
+/// viewport, the domain or `flutter_gpu`. Its only visual input is the token
+/// layer, and its only output is widgets.
 ///
-/// Punto de entrada unico: la aplicacion solo debe importar
-/// `package:lumiere_ui/lumiere_ui.dart`. Todo lo demas vive bajo `src/` y no es
-/// API publica.
+/// Single entry point: applications should import
+/// `package:lumiere_ui/lumiere_ui.dart` and nothing else. Everything under
+/// `src/` is implementation detail.
 library;
 
 export 'src/components/button/lumiere_button.dart';
 export 'src/theme/lumiere_theme.dart';
 export 'src/tokens/lumiere_tokens.dart';
-// `src/tokens/tokens.g.dart` NO se exporta a proposito: contiene valores
-// provisionales y solo debe consumirlos `LumiereTokens`.
+
+// Mode-independent scales are safe to expose: they are the same in light and
+// dark. The raw colour layers are not exported on purpose, so colours can only
+// be reached through the semantic roles in [LumiereColors].
+export 'src/tokens/tokens.g.dart'
+    show ArcoControl, ArcoRadius, ArcoSpace, ArcoType;
