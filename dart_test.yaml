@@ -1,0 +1,8 @@
+# Declaracion de etiquetas de prueba.
+#
+# `golden` agrupa las pruebas que comparan una imagen de referencia. Dependen de
+# la rasterizacion del sistema operativo, asi que solo se ejecutan en el SO de
+# referencia y en local: la CI las excluye.
+tags:
+  golden:
+    description: Pruebas de imagen de referencia (dependen del SO).

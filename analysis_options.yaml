@@ -1,0 +1,10 @@
+analyzer:
+  exclude:
+    - build/**
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # La API publica del paquete se documenta a mano; no exigimos doc en cada
+    # miembro privado de src/.
+    public_member_api_docs: false

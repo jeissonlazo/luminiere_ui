@@ -1,0 +1,31 @@
+# Sistema de diseño y biblioteca de componentes de Lumiere.
+#
+# Paquete Flutter independiente: no conoce la aplicación, el editor, el viewport
+# ni el dominio. Su única entrada visual son los tokens.
+name: lumiere_ui
+description: >-
+  Sistema de diseño y biblioteca de componentes de Lumiere: tokens, tema y
+  componentes accesibles derivados de Arco, sin dependencias de la aplicación.
+version: 0.1.0
+
+repository: https://github.com/jeissonlazo/luminiere_ui
+issue_tracker: https://github.com/jeissonlazo/luminiere_ui/issues
+
+topics:
+  - design-system
+  - widgets
+  - theming
+  - ui
+
+environment:
+  sdk: ^3.13.5
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

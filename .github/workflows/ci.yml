@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Dependencias
+        run: flutter pub get
+
+      - name: Análisis estático
+        run: flutter analyze
+
+      # Los goldens dependen de la rasterización del sistema operativo y su línea
+      # base se genera en Windows. En un runner Linux no coinciden: se excluyen.
+      # Se regeneran y validan en local con `flutter test --update-goldens`.
+      - name: Pruebas (sin goldens)
+        run: flutter test --exclude-tags=golden
+
+      - name: Comprobación de publicación
+        run: flutter pub publish --dry-run

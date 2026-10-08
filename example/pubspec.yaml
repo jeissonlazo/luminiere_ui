@@ -1,0 +1,18 @@
+name: lumiere_ui_example
+description: Ejemplo de uso del paquete lumiere_ui.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  lumiere_ui:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

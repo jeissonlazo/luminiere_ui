@@ -1,0 +1,20 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+build/
+
+# Un paquete (libreria) no fija versiones para sus consumidores: el lockfile no
+# se versiona. Lo fija la aplicacion que lo consume.
+pubspec.lock
+
+# Cobertura
+coverage/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
