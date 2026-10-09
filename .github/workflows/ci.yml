@@ -15,17 +15,18 @@ jobs:
         with:
           channel: stable
 
-      - name: Dependencias
+      - name: Dependencies
         run: flutter pub get
 
-      - name: Análisis estático
+      - name: Static analysis
         run: flutter analyze
 
-      # Los goldens dependen de la rasterización del sistema operativo y su línea
-      # base se genera en Windows. En un runner Linux no coinciden: se excluyen.
-      # Se regeneran y validan en local con `flutter test --update-goldens`.
-      - name: Pruebas (sin goldens)
+      # Goldens depend on the operating system's rasterisation and their
+      # baseline is generated on Windows. On a Linux runner they do not match,
+      # so they are excluded. They are regenerated and validated locally with
+      # `flutter test --update-goldens`.
+      - name: Tests (without goldens)
         run: flutter test --exclude-tags=golden
 
-      - name: Comprobación de publicación
+      - name: Publish check
         run: flutter pub publish --dry-run

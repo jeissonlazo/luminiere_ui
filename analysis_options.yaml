@@ -5,6 +5,6 @@ include: package:flutter_lints/flutter.yaml
 
 linter:
   rules:
-    # La API publica del paquete se documenta a mano; no exigimos doc en cada
-    # miembro privado de src/.
+    # The package's public API is documented by hand, so we do not require docs
+    # on every private member of src/.
     public_member_api_docs: false

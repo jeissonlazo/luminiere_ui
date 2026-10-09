@@ -298,8 +298,8 @@ class LumiereColors {
 
 /// Which status ramp a component should use.
 ///
-/// Mirrors the design's `种类` (kind) axis: standard uses the brand ramp, the
-/// rest use their own.
+/// Mirrors the design's `kind` axis: standard uses the brand ramp, the rest use
+/// their own.
 enum LumiereRamp { accent, success, warning, danger }
 
 /// Design tokens published through the theme.

@@ -8,8 +8,9 @@ import '../../tokens/tokens.g.dart';
 
 /// Visual weight of the button.
 ///
-/// Mirrors the `类型` axis of the `Button` component set in the design file:
-/// `主要按钮 / 次要按钮 / 虚框按钮 / 线框按钮 / 文本按钮`.
+/// Mirrors the `type` axis of the `Button` component set in the design file,
+/// with the options `primary`, `secondary`, `dashed`, `outline` and `text`.
+/// The original design names are mapped in `design/variables/terminology.json`.
 enum LumiereButtonType {
   /// Filled with the ramp's normal colour.
   primary,
@@ -29,14 +30,18 @@ enum LumiereButtonType {
 
 /// Semantic colour of the button.
 ///
-/// Mirrors the `种类` axis: `标准 / 危险 / 警告 / 成功`.
+/// Mirrors the `kind` axis, with the options `standard`, `danger`, `warning`
+/// and `success`. The original design names are mapped in
+/// `design/variables/terminology.json`.
 enum LumiereButtonKind { standard, danger, warning, success }
 
 /// Corner treatment and box proportion.
 ///
-/// Mirrors the `形状` axis: `长方形 / 全圆角 / 方形 / 圆形`. Note that this axis
-/// covers two things at once: how round the corners are, and whether the box is
-/// free-width (text buttons) or square (icon-only buttons).
+/// Mirrors the `shape` axis, with the options `rectangle`, `pill`, `square`
+/// and `circle`. The original design names are mapped in
+/// `design/variables/terminology.json`. Note that this axis covers two things
+/// at once: how round the corners are, and whether the box is free-width (text
+/// buttons) or square (icon-only buttons).
 enum LumiereButtonShape {
   /// Free width, small radius.
   rectangle,
@@ -51,17 +56,19 @@ enum LumiereButtonShape {
   circle,
 }
 
-/// Control height. Mirrors the `尺寸` axis: `大 / 中 / 小 / 迷你`.
+/// Control height. Mirrors the `size` axis, with the options `large`, `medium`,
+/// `small` and `mini`. The original design names are mapped in
+/// `design/variables/terminology.json`.
 enum LumiereButtonSize { large, medium, small, mini }
 
 /// Button of the design system.
 ///
-/// The design declares a `状态` (state) axis with `默认 / 悬停 / 聚焦 / 激活 /
-/// 禁用`. Those are **real widget states** in Flutter rather than properties, so
-/// this widget resolves them through [WidgetStateProperty] instead of asking the
-/// caller to pass them; passing them would let a caller describe a state the
-/// widget is not actually in. `loading` is the only state that cannot be
-/// expressed that way, so it stays a property.
+/// The design declares a `state` axis, whose options (`default`, `hover`,
+/// `focus`, `active`, `disabled`) are **real widget states** in Flutter rather
+/// than properties, so this widget resolves them through [WidgetStateProperty]
+/// instead of asking the caller to pass them; passing them would let a caller
+/// describe a state the widget is not actually in. `loading` is the only state
+/// that cannot be expressed that way, so it stays a property.
 ///
 /// Pending verification against the design file: the horizontal padding per size.
 /// The variables export carries no padding tokens, so it is derived from the
