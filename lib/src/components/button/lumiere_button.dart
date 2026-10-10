@@ -197,11 +197,14 @@ class LumiereButton extends StatelessWidget {
         };
       }
       return switch (type) {
+        // Solid fill: the pair the accessibility contract prescribes. The hover
+        // and pressed steps stay as the design declares them, which the register
+        // records as AE-12 to AE-15.
         LumiereButtonType.primary => states.contains(WidgetState.pressed)
             ? ramp.active
             : states.contains(WidgetState.hovered)
                 ? ramp.hover
-                : ramp.normal,
+                : ramp.solidFill,
         LumiereButtonType.secondary => states.contains(WidgetState.pressed)
             ? colors.fillHeavy
             : states.contains(WidgetState.hovered)
@@ -221,7 +224,7 @@ class LumiereButton extends StatelessWidget {
             : ramp.textDisabled;
       }
       return type == LumiereButtonType.primary
-          ? colors.textOnAccent
+          ? ramp.solidLabel
           : states.contains(WidgetState.hovered)
               ? ramp.hover
               : ramp.normal;

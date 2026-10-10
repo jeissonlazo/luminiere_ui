@@ -27,6 +27,8 @@ class LumiereStatusColors {
     required this.normal,
     required this.hover,
     required this.active,
+    required this.solidFill,
+    required this.solidLabel,
   });
 
   /// Subtle background built from this ramp.
@@ -47,6 +49,14 @@ class LumiereStatusColors {
   /// Pressed state.
   final Color active;
 
+  /// Fill of a solid surface of this family, and the label that sits on it.
+  ///
+  /// The two are a pair on purpose: a solid control must not choose its fill and
+  /// its label independently. The values are the ones the accessibility contract
+  /// prescribes in section 3.2, and the level-1 test asserts the pair.
+  final Color solidFill;
+  final Color solidLabel;
+
   static LumiereStatusColors _lerp(
     LumiereStatusColors a,
     LumiereStatusColors b,
@@ -59,6 +69,8 @@ class LumiereStatusColors {
         normal: Color.lerp(a.normal, b.normal, t)!,
         hover: Color.lerp(a.hover, b.hover, t)!,
         active: Color.lerp(a.active, b.active, t)!,
+        solidFill: Color.lerp(a.solidFill, b.solidFill, t)!,
+        solidLabel: Color.lerp(a.solidLabel, b.solidLabel, t)!,
       );
 
   @override
@@ -69,11 +81,21 @@ class LumiereStatusColors {
       other.disabled == disabled &&
       other.normal == normal &&
       other.hover == hover &&
-      other.active == active;
+      other.active == active &&
+      other.solidFill == solidFill &&
+      other.solidLabel == solidLabel;
 
   @override
-  int get hashCode =>
-      Object.hash(subtle, textDisabled, disabled, normal, hover, active);
+  int get hashCode => Object.hash(
+        subtle,
+        textDisabled,
+        disabled,
+        normal,
+        hover,
+        active,
+        solidFill,
+        solidLabel,
+      );
 }
 
 /// The colours the design file offers for a tag.
@@ -229,6 +251,8 @@ class LumiereColors {
       normal: ArcoSemanticDark.primary6,
       hover: ArcoSemanticDark.primary5,
       active: ArcoSemanticDark.primary7,
+      solidFill: ArcoSemanticDark.primary4,
+      solidLabel: ArcoSemanticDark.bgWhite,
     ),
     success: LumiereStatusColors(
       subtle: ArcoSemanticDark.success1,
@@ -237,6 +261,8 @@ class LumiereColors {
       normal: ArcoSemanticDark.success6,
       hover: ArcoSemanticDark.success5,
       active: ArcoSemanticDark.success7,
+      solidFill: ArcoSemanticDark.success6,
+      solidLabel: ArcoSemanticLight.text1,
     ),
     warning: LumiereStatusColors(
       subtle: ArcoSemanticDark.warning1,
@@ -245,6 +271,8 @@ class LumiereColors {
       normal: ArcoSemanticDark.warning6,
       hover: ArcoSemanticDark.warning5,
       active: ArcoSemanticDark.warning7,
+      solidFill: ArcoSemanticDark.warning6,
+      solidLabel: ArcoSemanticLight.text1,
     ),
     danger: LumiereStatusColors(
       subtle: ArcoSemanticDark.danger1,
@@ -253,6 +281,8 @@ class LumiereColors {
       normal: ArcoSemanticDark.danger6,
       hover: ArcoSemanticDark.danger5,
       active: ArcoSemanticDark.danger7,
+      solidFill: ArcoSemanticDark.danger6,
+      solidLabel: ArcoSemanticLight.text1,
     ),
     borderSubtle: ArcoSemanticDark.border1,
     borderDefault: ArcoSemanticDark.border2,
@@ -343,6 +373,8 @@ class LumiereColors {
       normal: ArcoSemanticLight.primary6,
       hover: ArcoSemanticLight.primary5,
       active: ArcoSemanticLight.primary7,
+      solidFill: ArcoSemanticLight.primary6,
+      solidLabel: ArcoSemanticLight.bgWhite,
     ),
     success: LumiereStatusColors(
       subtle: ArcoSemanticLight.success1,
@@ -351,6 +383,8 @@ class LumiereColors {
       normal: ArcoSemanticLight.success6,
       hover: ArcoSemanticLight.success5,
       active: ArcoSemanticLight.success7,
+      solidFill: ArcoSemanticLight.success6,
+      solidLabel: ArcoSemanticLight.text1,
     ),
     warning: LumiereStatusColors(
       subtle: ArcoSemanticLight.warning1,
@@ -359,6 +393,8 @@ class LumiereColors {
       normal: ArcoSemanticLight.warning6,
       hover: ArcoSemanticLight.warning5,
       active: ArcoSemanticLight.warning7,
+      solidFill: ArcoSemanticLight.warning6,
+      solidLabel: ArcoSemanticLight.text1,
     ),
     danger: LumiereStatusColors(
       subtle: ArcoSemanticLight.danger1,
@@ -367,6 +403,8 @@ class LumiereColors {
       normal: ArcoSemanticLight.danger6,
       hover: ArcoSemanticLight.danger5,
       active: ArcoSemanticLight.danger7,
+      solidFill: ArcoSemanticLight.danger7,
+      solidLabel: ArcoSemanticLight.text1,
     ),
     borderSubtle: ArcoSemanticLight.border1,
     borderDefault: ArcoSemanticLight.border2,
