@@ -3,6 +3,36 @@
 All notable changes to this package are documented here.
 Format based on Keep a Changelog; versioning follows Semantic Versioning.
 
+## 0.3.0
+
+### Changed (breaking)
+
+- Spacing scale approved as 4 / 8 / 12 / 16 / 20, every step divisible by two. It
+  supersedes the 4 / 8 / 16 / 24 that the `Space` component declared: it adds 12
+  and 20 because those are the measured control paddings, and drops 24 in favour
+  of 20. The names keep their positions, so `ArcoSpace.spaceMd` is now 12 and
+  `ArcoSpace.spaceLg` is now 16.
+- `LumiereButton` no longer derives its horizontal padding from the spacing scale.
+  It uses the measured control padding: large 20, medium 16, small 16 and mini 12,
+  instead of 16 for large and medium and 8 for small and mini.
+
+### Added
+
+- `ArcoControl.paddingMini`, `paddingSmall`, `paddingMedium` and
+  `paddingLarge`, measured from the control geometry: 30 variants per size with
+  zero variance.
+- Rule `DS-CONTROL-001`, which fixes control height and horizontal padding
+  together, and rule `DS-SPACE-001` now carries the approved scale.
+
+### Notes
+
+- The control heights (24 / 28 / 32 / 36) are no longer marked as pending
+  verification: they are measured. The measurement comes from the Arco kit
+  geometry rather than from the project's Figma file, whose account is rate
+  limited. The provenance is recorded in
+  `design/reference/control-geometry.json` and in the rule rationale.
+- The golden was regenerated because the button padding changed.
+
 ## 0.2.0
 
 ### Changed (breaking)

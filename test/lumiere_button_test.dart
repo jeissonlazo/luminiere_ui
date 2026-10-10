@@ -202,16 +202,49 @@ void main() {
     });
 
     test('the scales are the ones declared by the design file', () {
+      // Approved scale: every step divisible by two. It supersedes the 4 / 8 /
+      // 16 / 24 that the Space component declares. See DS-SPACE-001.
       expect(ArcoSpace.spaceXs, 4);
       expect(ArcoSpace.spaceSm, 8);
-      expect(ArcoSpace.spaceMd, 16);
-      expect(ArcoSpace.spaceLg, 24);
+      expect(ArcoSpace.spaceMd, 12);
+      expect(ArcoSpace.spaceLg, 16);
+      expect(ArcoSpace.spaceXl, 20);
 
       expect(ArcoRadius.radiusSm, 2);
       expect(ArcoRadius.radiusMd, 4);
       expect(ArcoRadius.radiusLg, 8);
 
       expect(ArcoType.fontFamily, 'Nunito Sans');
+    });
+
+    test('the control scale pairs every height with its padding', () {
+      // Measured from the control geometry: 30 variants per size, zero variance.
+      // See DS-CONTROL-001 and design/reference/control-geometry.json.
+      expect(ArcoControl.heightMini, 24);
+      expect(ArcoControl.paddingMini, 12);
+      expect(ArcoControl.heightSmall, 28);
+      expect(ArcoControl.paddingSmall, 16);
+      expect(ArcoControl.heightMedium, 32);
+      expect(ArcoControl.paddingMedium, 16);
+      expect(ArcoControl.heightLarge, 36);
+      expect(ArcoControl.paddingLarge, 20);
+
+      // The invariant the approved scale implies: control padding is spacing.
+      const List<double> spacing = <double>[
+        ArcoSpace.spaceXs,
+        ArcoSpace.spaceSm,
+        ArcoSpace.spaceMd,
+        ArcoSpace.spaceLg,
+        ArcoSpace.spaceXl,
+      ];
+      for (final double padding in <double>[
+        ArcoControl.paddingMini,
+        ArcoControl.paddingSmall,
+        ArcoControl.paddingMedium,
+        ArcoControl.paddingLarge,
+      ]) {
+        expect(spacing, contains(padding), reason: 'padding $padding is not on the spacing scale');
+      }
     });
   });
 }

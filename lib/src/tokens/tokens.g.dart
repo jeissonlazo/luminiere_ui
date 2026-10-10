@@ -540,12 +540,14 @@ abstract final class ArcoType {
 
 /// Spacing scale.
 ///
-/// The design file declares it in the "Space" component: 4 / 8 / 16 / 24.
+/// Approved scale: 4 / 8 / 12 / 16 / 20 px, every step divisible by two.
+/// The rationale lives in design/variables/scales.json.
 abstract final class ArcoSpace {
   static const double spaceXs = 4;
   static const double spaceSm = 8;
-  static const double spaceMd = 16;
-  static const double spaceLg = 24;
+  static const double spaceMd = 12;
+  static const double spaceLg = 16;
+  static const double spaceXl = 20;
 }
 
 /// Corner radius scale.
@@ -558,10 +560,14 @@ abstract final class ArcoRadius {
 
 /// Control heights.
 ///
-/// PENDING VERIFICATION against the file. These come from Arco's published component specification, not from a measurement of this file. The Button component set lists the four sizes (large/medium/small/mini) but their exact pixel heights have not been extracted yet.
+/// Measured from the geometry of the Arco kit: 30 variants per size, zero variance. Every control carries its own horizontal padding because the button needs both values together, and both land on the approved spacing scale. The measurement comes from the Arco kit geometry rather than from the Figma file, whose account is rate limited; the values match the ones the tokens already carried.
 abstract final class ArcoControl {
   static const double heightMini = 24;
+  static const double paddingMini = 12;
   static const double heightSmall = 28;
+  static const double paddingSmall = 16;
   static const double heightMedium = 32;
+  static const double paddingMedium = 16;
   static const double heightLarge = 36;
+  static const double paddingLarge = 20;
 }

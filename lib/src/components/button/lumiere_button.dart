@@ -70,9 +70,10 @@ enum LumiereButtonSize { large, medium, small, mini }
 /// describe a state the widget is not actually in. `loading` is the only state
 /// that cannot be expressed that way, so it stays a property.
 ///
-/// Pending verification against the design file: the horizontal padding per size.
-/// The variables export carries no padding tokens, so it is derived from the
-/// spacing scale ([ArcoSpace]) until the component geometry is extracted.
+/// Height and horizontal padding per size come from the measured control scale
+/// ([ArcoControl]): 36/20, 32/16, 28/16 and 24/12 for large, medium, small and
+/// mini. The measurement is recorded in `design/reference/control-geometry.json`
+/// and enforced by rule `DS-CONTROL-001`.
 class LumiereButton extends StatelessWidget {
   const LumiereButton({
     super.key,
@@ -138,8 +139,10 @@ class LumiereButton extends StatelessWidget {
       };
 
   double get _horizontalPadding => switch (size) {
-        LumiereButtonSize.large || LumiereButtonSize.medium => ArcoSpace.spaceMd,
-        LumiereButtonSize.small || LumiereButtonSize.mini => ArcoSpace.spaceSm,
+        LumiereButtonSize.large => ArcoControl.paddingLarge,
+        LumiereButtonSize.medium => ArcoControl.paddingMedium,
+        LumiereButtonSize.small => ArcoControl.paddingSmall,
+        LumiereButtonSize.mini => ArcoControl.paddingMini,
       };
 
   bool get _hasOutline =>
