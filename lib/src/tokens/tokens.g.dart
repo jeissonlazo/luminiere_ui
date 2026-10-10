@@ -3,7 +3,7 @@
 // Source : Figma > "Arco Design System lumimier" (file E6OUz1aF3tykVnr341r6fl)
 //          variables export (color palette, semantic ramps, component tokens)
 //          and the type scale from page "Basic styles".
-// Command: node tools/build-tokens.mjs
+// Command: node design/tools/build-tokens.mjs
 //
 // Everything here is a measured value from the design file. Semantic naming and
 // component APIs live one layer above, in hand-written code that only refers to
@@ -570,4 +570,14 @@ abstract final class ArcoControl {
   static const double paddingMedium = 16;
   static const double heightLarge = 36;
   static const double paddingLarge = 20;
+}
+
+/// Tag heights.
+///
+/// Measured from the Tag geometry: 91 variants per size, zero variance. The tag is four pixels shorter than the control of the equivalent name, so it gets its own scale rather than reusing the control one.
+abstract final class ArcoTag {
+  static const double heightMini = 20;
+  static const double heightSmall = 24;
+  static const double heightMedium = 28;
+  static const double heightLarge = 32;
 }

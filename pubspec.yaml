@@ -6,7 +6,7 @@ name: lumiere_ui
 description: >-
   Lumiere's design system and component library: tokens, theme and accessible
   components derived from Arco, with no dependency on the application.
-version: 0.3.0
+version: 0.4.0
 
 repository: https://github.com/jeissonlazo/luminiere_ui
 issue_tracker: https://github.com/jeissonlazo/luminiere_ui/issues

@@ -76,6 +76,58 @@ class LumiereStatusColors {
       Object.hash(subtle, textDisabled, disabled, normal, hover, active);
 }
 
+/// The colours the design file offers for a tag.
+///
+/// The names are the design's own and are kept untranslated in code because they
+/// are an axis of the \`Tag\` component, not prose. The mapping from each name to a
+/// palette family was verified by comparing the measured hexadecimal values with
+/// the palette constants, not by interpreting the names.
+enum LumiereTagColorName {
+  neutral,
+  romanticRed,
+  wildGreen,
+  blueTide,
+  vitalityOrange,
+  lateAutumnRed,
+  dusk,
+  youthPurple,
+  magenta,
+  ultimateBlue,
+  seaBlue,
+}
+
+/// The colours of a tag: the soft background of the filled form, the stronger
+/// background of the bordered form, and the ink of its text and icon.
+@immutable
+class LumiereTagColor {
+  const LumiereTagColor({
+    required this.subtle,
+    required this.strong,
+    required this.ink,
+  });
+
+  final Color subtle;
+  final Color strong;
+  final Color ink;
+
+  static LumiereTagColor _lerp(LumiereTagColor a, LumiereTagColor b, double t) =>
+      LumiereTagColor(
+        subtle: Color.lerp(a.subtle, b.subtle, t)!,
+        strong: Color.lerp(a.strong, b.strong, t)!,
+        ink: Color.lerp(a.ink, b.ink, t)!,
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      other is LumiereTagColor &&
+      other.subtle == subtle &&
+      other.strong == strong &&
+      other.ink == ink;
+
+  @override
+  int get hashCode => Object.hash(subtle, strong, ink);
+}
+
 /// Semantic colour roles of the design system.
 ///
 /// Every role points at a primitive from the Figma variables export. The
@@ -110,6 +162,7 @@ class LumiereColors {
     required this.fillDefault,
     required this.fillStrong,
     required this.fillHeavy,
+    required this.tagColors,
   });
 
   /// Page background (`bg.1`).
@@ -150,6 +203,13 @@ class LumiereColors {
   final Color fillDefault;
   final Color fillStrong;
   final Color fillHeavy;
+
+  /// Tag colours, keyed by the name the design file uses for the axis.
+  final Map<LumiereTagColorName, LumiereTagColor> tagColors;
+
+  /// Tag colours for a name. Falls back to the neutral entry.
+  LumiereTagColor tag(LumiereTagColorName name) =>
+      tagColors[name] ?? tagColors[LumiereTagColorName.neutral]!;
 
   /// Roles for the dark theme.
   static const LumiereColors dark = LumiereColors(
@@ -202,6 +262,63 @@ class LumiereColors {
     fillDefault: ArcoSemanticDark.fill2,
     fillStrong: ArcoSemanticDark.fill3,
     fillHeavy: ArcoSemanticDark.fill4,
+    tagColors: <LumiereTagColorName, LumiereTagColor>{
+      LumiereTagColorName.neutral: LumiereTagColor(
+        subtle: ArcoSemanticDark.fill2,
+        strong: ArcoSemanticDark.fill3,
+        ink: ArcoSemanticDark.text1,
+      ),
+      LumiereTagColorName.romanticRed: LumiereTagColor(
+        subtle: ArcoPaletteDark.red1,
+        strong: ArcoPaletteDark.red2,
+        ink: ArcoPaletteDark.red6,
+      ),
+      LumiereTagColorName.wildGreen: LumiereTagColor(
+        subtle: ArcoPaletteDark.green1,
+        strong: ArcoPaletteDark.green2,
+        ink: ArcoPaletteDark.green6,
+      ),
+      LumiereTagColorName.blueTide: LumiereTagColor(
+        subtle: ArcoPaletteDark.cyan1,
+        strong: ArcoPaletteDark.cyan2,
+        ink: ArcoPaletteDark.cyan6,
+      ),
+      LumiereTagColorName.vitalityOrange: LumiereTagColor(
+        subtle: ArcoPaletteDark.orange1,
+        strong: ArcoPaletteDark.orange2,
+        ink: ArcoPaletteDark.orange6,
+      ),
+      LumiereTagColorName.lateAutumnRed: LumiereTagColor(
+        subtle: ArcoPaletteDark.orangeRedOrangeRed1,
+        strong: ArcoPaletteDark.orangeRedOrangeRed2,
+        ink: ArcoPaletteDark.orangeRedOrangeRed6,
+      ),
+      LumiereTagColorName.dusk: LumiereTagColor(
+        subtle: ArcoPaletteDark.gold1,
+        strong: ArcoPaletteDark.gold2,
+        ink: ArcoPaletteDark.gold6,
+      ),
+      LumiereTagColorName.youthPurple: LumiereTagColor(
+        subtle: ArcoPaletteDark.pinkPurplePinkPurple1,
+        strong: ArcoPaletteDark.pinkPurplePinkPurple2,
+        ink: ArcoPaletteDark.pinkPurplePinkPurple6,
+      ),
+      LumiereTagColorName.magenta: LumiereTagColor(
+        subtle: ArcoPaletteDark.magenta1,
+        strong: ArcoPaletteDark.magenta2,
+        ink: ArcoPaletteDark.magenta6,
+      ),
+      LumiereTagColorName.ultimateBlue: LumiereTagColor(
+        subtle: ArcoPaletteDark.primary1,
+        strong: ArcoPaletteDark.primary2,
+        ink: ArcoPaletteDark.primary6,
+      ),
+      LumiereTagColorName.seaBlue: LumiereTagColor(
+        subtle: ArcoPaletteDark.blue1,
+        strong: ArcoPaletteDark.blue2,
+        ink: ArcoPaletteDark.blue6,
+      ),
+    },
   );
 
   /// Roles for the light theme.
@@ -259,6 +376,63 @@ class LumiereColors {
     fillDefault: ArcoSemanticLight.fill2,
     fillStrong: ArcoSemanticLight.fill3,
     fillHeavy: ArcoSemanticLight.fill4,
+    tagColors: <LumiereTagColorName, LumiereTagColor>{
+      LumiereTagColorName.neutral: LumiereTagColor(
+        subtle: ArcoSemanticLight.fill2,
+        strong: ArcoSemanticLight.fill3,
+        ink: ArcoSemanticLight.text1,
+      ),
+      LumiereTagColorName.romanticRed: LumiereTagColor(
+        subtle: ArcoPaletteLight.red1,
+        strong: ArcoPaletteLight.red2,
+        ink: ArcoPaletteLight.red6,
+      ),
+      LumiereTagColorName.wildGreen: LumiereTagColor(
+        subtle: ArcoPaletteLight.green1,
+        strong: ArcoPaletteLight.green2,
+        ink: ArcoPaletteLight.green6,
+      ),
+      LumiereTagColorName.blueTide: LumiereTagColor(
+        subtle: ArcoPaletteLight.cyan1,
+        strong: ArcoPaletteLight.cyan2,
+        ink: ArcoPaletteLight.cyan6,
+      ),
+      LumiereTagColorName.vitalityOrange: LumiereTagColor(
+        subtle: ArcoPaletteLight.orange1,
+        strong: ArcoPaletteLight.orange2,
+        ink: ArcoPaletteLight.orange6,
+      ),
+      LumiereTagColorName.lateAutumnRed: LumiereTagColor(
+        subtle: ArcoPaletteLight.orangeRedOrangeRed1,
+        strong: ArcoPaletteLight.orangeRedOrangeRed2,
+        ink: ArcoPaletteLight.orangeRedOrangeRed6,
+      ),
+      LumiereTagColorName.dusk: LumiereTagColor(
+        subtle: ArcoPaletteLight.gold1,
+        strong: ArcoPaletteLight.gold2,
+        ink: ArcoPaletteLight.gold6,
+      ),
+      LumiereTagColorName.youthPurple: LumiereTagColor(
+        subtle: ArcoPaletteLight.pinkPurplePinkPurple1,
+        strong: ArcoPaletteLight.pinkPurplePinkPurple2,
+        ink: ArcoPaletteLight.pinkPurplePinkPurple6,
+      ),
+      LumiereTagColorName.magenta: LumiereTagColor(
+        subtle: ArcoPaletteLight.magenta1,
+        strong: ArcoPaletteLight.magenta2,
+        ink: ArcoPaletteLight.magenta6,
+      ),
+      LumiereTagColorName.ultimateBlue: LumiereTagColor(
+        subtle: ArcoPaletteLight.primary1,
+        strong: ArcoPaletteLight.primary2,
+        ink: ArcoPaletteLight.primary6,
+      ),
+      LumiereTagColorName.seaBlue: LumiereTagColor(
+        subtle: ArcoPaletteLight.blue1,
+        strong: ArcoPaletteLight.blue2,
+        ink: ArcoPaletteLight.blue6,
+      ),
+    },
   );
 
   /// The status ramp that backs a given kind.
@@ -293,6 +467,10 @@ class LumiereColors {
         fillDefault: Color.lerp(a.fillDefault, b.fillDefault, t)!,
         fillStrong: Color.lerp(a.fillStrong, b.fillStrong, t)!,
         fillHeavy: Color.lerp(a.fillHeavy, b.fillHeavy, t)!,
+        tagColors: <LumiereTagColorName, LumiereTagColor>{
+          for (final LumiereTagColorName name in LumiereTagColorName.values)
+            name: LumiereTagColor._lerp(a.tag(name), b.tag(name), t),
+        },
       );
 }
 
