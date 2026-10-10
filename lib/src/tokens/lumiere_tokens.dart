@@ -403,8 +403,9 @@ class LumiereColors {
       normal: ArcoSemanticLight.danger6,
       hover: ArcoSemanticLight.danger5,
       active: ArcoSemanticLight.danger7,
+      // White, not dark ink: on danger.7 the ink measures 2.97 and white 5.43.
       solidFill: ArcoSemanticLight.danger7,
-      solidLabel: ArcoSemanticLight.text1,
+      solidLabel: ArcoSemanticLight.bgWhite,
     ),
     borderSubtle: ArcoSemanticLight.border1,
     borderDefault: ArcoSemanticLight.border2,

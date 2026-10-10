@@ -13,7 +13,10 @@
 //    documents, in both themes;
 //  * it asserts both the threshold the combination has to reach and the value
 //    the contract records for it, so a palette change that moves a colour is
-//    caught even when the ratio stays above the threshold.
+//    caught even when the ratio stays above the threshold;
+//  * it asserts the `solidFill` and `solidLabel` pair of every status family as
+//    a pair, read from `LumiereStatusColors`, so the pairing is a verifiable
+//    property of the system and not only a row of this table.
 //
 // The exception register of section 8 is encoded, never bypassed. AE-08 and
 // AE-11 are open: the test asserts that the combinations they cover still fail
@@ -31,6 +34,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+// The semantic layer is reached through the package entry point: the solid fill
+// and label of a family are a pair on `LumiereStatusColors`, and that pair is
+// what the level-1 test has to verify, not a second literal table.
+import 'package:lumiere_ui/lumiere_ui.dart'
+    show LumiereColors, LumiereRamp, LumiereStatusColors;
 import 'package:lumiere_ui/src/tokens/tokens.g.dart';
 
 /// Normal text: section 1 requires 4.5:1.
@@ -259,6 +267,12 @@ final List<_Pair> _pairs = <_Pair>[
   // the component closes (white on primary.6 in the dark theme, white on
   // danger.6 and on the status steps in the light theme, and so on) are not
   // documented as usable, so they are not part of this table.
+  //
+  // These eight rows are the same combinations `LumiereStatusColors.solidFill`
+  // and `solidLabel` expose per family. They are recorded once, here, against
+  // the primitives and the decimals of the contract; the group `solid pairs of
+  // the semantic layer` reads the pair from the roles and pins its ratio to
+  // these values, so no combination is recorded twice.
   _dark('white', 'primary.4', 6.90, _solidLabel),
   _dark('ink', 'danger.6', 5.50, _solidLabel),
   _dark('ink', 'warning.6', 7.41, _solidLabel),
@@ -393,6 +407,12 @@ const List<_RegisteredException> _exceptions = <_RegisteredException>[
       'light border.3 on bg.1',
     ],
   ),
+];
+
+/// The two themes of the contract, with the name used in every message.
+const List<(String, LumiereColors)> _themes = <(String, LumiereColors)>[
+  ('dark', LumiereColors.dark),
+  ('light', LumiereColors.light),
 ];
 
 void main() {
@@ -533,6 +553,83 @@ void main() {
               '${_measured(ceiling)} measured, ${_measured(highest)} is the '
               'recorded ceiling.',
         );
+      }
+    });
+  });
+
+  group('solid pairs of the semantic layer', () {
+    test('every family reaches 4.5:1 with the label of its solid fill', () {
+      for (final (String theme, LumiereColors colors) in _themes) {
+        for (final LumiereRamp ramp in LumiereRamp.values) {
+          final LumiereStatusColors family = colors.rampFor(ramp);
+          final double measured = _combinationRatio(
+            theme,
+            family.solidLabel,
+            family.solidFill,
+          );
+          expect(
+            measured,
+            greaterThanOrEqualTo(_normalText),
+            reason:
+                '$theme ${ramp.name}: solidLabel ${_hex(family.solidLabel)} on '
+                'solidFill ${_hex(family.solidFill)} measures '
+                '${_measured(measured)}, ${_normalText.toStringAsFixed(1)}:1 '
+                'required by section 3.2. The fill and the label are decided '
+                'together: fix the pair, not the label alone.',
+          );
+          final _Pair recorded = _recordedPair(
+            theme,
+            family.solidLabel,
+            family.solidFill,
+          );
+          expect(
+            measured,
+            closeTo(recorded.recorded, _tolerance),
+            reason:
+                '$theme ${ramp.name}: solidLabel ${_hex(family.solidLabel)} on '
+                'solidFill ${_hex(family.solidFill)} measures '
+                '${_measured(measured)}, while the table records '
+                '${_measured(recorded.recorded)} for ${recorded.id}. Update '
+                'section 3.2, the roles and this table together.',
+          );
+        }
+      }
+    });
+
+    test('every family declares both members and they are never one colour', () {
+      expect(
+        LumiereRamp.values.map((LumiereRamp ramp) => ramp.name).toSet(),
+        <String>{'accent', 'success', 'warning', 'danger'},
+        reason:
+            'section 3.2 names four families; a new one needs its solid pair '
+            'measured by this test before it can be used.',
+      );
+      for (final (String theme, LumiereColors colors) in _themes) {
+        for (final LumiereRamp ramp in LumiereRamp.values) {
+          final LumiereStatusColors family = colors.rampFor(ramp);
+          final String where = '$theme ${ramp.name}';
+          expect(
+            family.solidFill.a,
+            greaterThan(0),
+            reason:
+                '$where declares no solidFill: a fully transparent fill leaves '
+                'the family without a solid surface.',
+          );
+          expect(
+            family.solidLabel.a,
+            greaterThan(0),
+            reason:
+                '$where declares no solidLabel: a fully transparent label '
+                'leaves the surface unreadable.',
+          );
+          expect(
+            family.solidLabel,
+            isNot(equals(family.solidFill)),
+            reason:
+                '$where uses ${_hex(family.solidFill)} as fill and label at '
+                'once, so the label disappears into the surface.',
+          );
+        }
       }
     });
   });
@@ -701,9 +798,50 @@ Color _page(String theme) =>
     _token(theme == 'dark' ? _darkTokens : _lightTokens, 'bg.1');
 
 /// Ratio of a documented combination, transparency resolved first.
-double _contrast(_Pair pair) {
-  final Color surface = _composite(pair.background, _page(pair.theme));
-  return _ratio(_composite(pair.foreground, surface), surface);
+double _contrast(_Pair pair) =>
+    _combinationRatio(pair.theme, pair.foreground, pair.background);
+
+/// Ratio of a foreground and a background, transparency resolved first.
+///
+/// Used by the table and by the solid pairs of the semantic layer, so both are
+/// measured exactly the same way.
+double _combinationRatio(String theme, Color foreground, Color background) {
+  final Color surface = _composite(background, _page(theme));
+  return _ratio(_composite(foreground, surface), surface);
+}
+
+/// The recorded combination with this foreground and background, in this theme.
+///
+/// The pair a family exposes is one of the combinations section 3.2 already
+/// records against the primitives, so the solid pair test does not record it a
+/// second time: it looks the row up by colour and pins the pair to the value the
+/// contract records for it.
+_Pair _recordedPair(String theme, Color foreground, Color background) {
+  for (final _Pair pair in _pairs) {
+    if (pair.theme == theme &&
+        pair.foreground == foreground &&
+        pair.background == background) {
+      return pair;
+    }
+  }
+  fail(
+    'The $theme pair ${_hex(foreground)} on ${_hex(background)} is not one of '
+    'the combinations section 3 records, so nothing pins its ratio to the '
+    'contract. Use a documented ramp step and label, or add the combination to '
+    'the table.',
+  );
+}
+
+/// A colour as `#RRGGBB`, or as `#AARRGGBB` when it carries an alpha.
+String _hex(Color color) {
+  String channel(double value) =>
+      (value * 255).round().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final int alpha = (color.a * 255).round();
+  final String rgb =
+      '#${channel(color.r)}${channel(color.g)}${channel(color.b)}';
+  return alpha == 255
+      ? rgb
+      : '#${alpha.toRadixString(16).padLeft(2, '0').toUpperCase()}$rgb';
 }
 
 /// Looks a token up by the name section 3 uses, failing loudly on a typo.
