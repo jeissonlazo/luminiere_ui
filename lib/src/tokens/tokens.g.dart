@@ -402,7 +402,7 @@ abstract final class ArcoSemanticLight {
   static const Color success7 = Color(0xFF009A29);
   static const Color text1 = Color(0xFF1D2129);
   static const Color text2 = Color(0xFF4E5969);
-  static const Color text3 = Color(0xFF86909C);
+  static const Color text3 = Color(0xFF6A7583); // AE-08: not the design value, see design/variables/overrides.json
   static const Color text4 = Color(0xFFC9CDD4);
   static const Color textWhite = Color(0xFFFFFFFF);
   static const Color warning1 = Color(0xFFFFF7E8);
@@ -413,6 +413,8 @@ abstract final class ArcoSemanticLight {
   static const Color warning6 = Color(0xFFFF7D00);
   static const Color warning7 = Color(0xFFD25F00);
 }
+
+// Overrides applied in this class: text3 (AE-08).
 
 /// Component colors for the dark mode.
 ///

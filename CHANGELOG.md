@@ -3,6 +3,35 @@
 All notable changes to this package are documented here.
 Format based on Keep a Changelog; versioning follows Semantic Versioning.
 
+## 0.5.0
+
+### Changed (breaking)
+
+- `LumiereStatusColors` gains `onSubtle`, the ink of a family for text that sits
+  on its own subtle background. It is deliberately separate from `normal`, which
+  is the decorative fill: those fills measure 2.41 to 3.25 in the light theme,
+  below the 4.5:1 the accessibility contract requires of normal text.
+- The light `text.3` token is darkened from the exported `#86909C` to `#6A7583`,
+  the smallest change of the declared pair that reaches the threshold: 4.68:1 on
+  the light surfaces, with `text.2` still at 7.10 and `text.1` at 16.13, so the
+  hierarchy survives.
+
+### Added
+
+- The token generator applies declared overrides from
+  `design/variables/overrides.json` and marks the generated constant with the
+  rule that requires it, so a difference from the design file is visible in the
+  output instead of living in a comment somebody has to remember.
+- `test/accessibility/status_ink_test.dart`: asserts that every family declares an
+  ink, that the ink reaches 4.5:1 on its subtle background, that the values are the
+  measured ones, and that darkening `text.3` preserved the hierarchy of the scale.
+
+### Notes
+
+- `AE-08` and `AE-11` of the accessibility contract are implemented. The contract
+  has no open entry left: what remains is decided, accepted, or permanent by
+  design.
+
 ## 0.4.0
 
 ### Added

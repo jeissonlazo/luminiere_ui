@@ -29,6 +29,7 @@ class LumiereStatusColors {
     required this.active,
     required this.solidFill,
     required this.solidLabel,
+    required this.onSubtle,
   });
 
   /// Subtle background built from this ramp.
@@ -57,6 +58,14 @@ class LumiereStatusColors {
   final Color solidFill;
   final Color solidLabel;
 
+  /// Ink of this family for text that sits on its own subtle background.
+  ///
+  /// Independent of [normal], which is the decorative fill and measures below
+  /// 4.5:1 on the subtle background in the light theme. The step is the closest
+  /// one to the design's step 6 that reaches the threshold: see `AE-11` of the
+  /// accessibility contract. It is measured, not chosen by eye.
+  final Color onSubtle;
+
   static LumiereStatusColors _lerp(
     LumiereStatusColors a,
     LumiereStatusColors b,
@@ -71,6 +80,7 @@ class LumiereStatusColors {
         active: Color.lerp(a.active, b.active, t)!,
         solidFill: Color.lerp(a.solidFill, b.solidFill, t)!,
         solidLabel: Color.lerp(a.solidLabel, b.solidLabel, t)!,
+        onSubtle: Color.lerp(a.onSubtle, b.onSubtle, t)!,
       );
 
   @override
@@ -83,7 +93,8 @@ class LumiereStatusColors {
       other.hover == hover &&
       other.active == active &&
       other.solidFill == solidFill &&
-      other.solidLabel == solidLabel;
+      other.solidLabel == solidLabel &&
+      other.onSubtle == onSubtle;
 
   @override
   int get hashCode => Object.hash(
@@ -95,6 +106,7 @@ class LumiereStatusColors {
         active,
         solidFill,
         solidLabel,
+        onSubtle,
       );
 }
 
@@ -253,6 +265,7 @@ class LumiereColors {
       active: ArcoSemanticDark.primary7,
       solidFill: ArcoSemanticDark.primary4,
       solidLabel: ArcoSemanticDark.bgWhite,
+      onSubtle: ArcoPaletteDark.primary6,
     ),
     success: LumiereStatusColors(
       subtle: ArcoSemanticDark.success1,
@@ -263,6 +276,7 @@ class LumiereColors {
       active: ArcoSemanticDark.success7,
       solidFill: ArcoSemanticDark.success6,
       solidLabel: ArcoSemanticLight.text1,
+      onSubtle: ArcoPaletteDark.green7,
     ),
     warning: LumiereStatusColors(
       subtle: ArcoSemanticDark.warning1,
@@ -273,6 +287,7 @@ class LumiereColors {
       active: ArcoSemanticDark.warning7,
       solidFill: ArcoSemanticDark.warning6,
       solidLabel: ArcoSemanticLight.text1,
+      onSubtle: ArcoPaletteDark.orange6,
     ),
     danger: LumiereStatusColors(
       subtle: ArcoSemanticDark.danger1,
@@ -283,6 +298,7 @@ class LumiereColors {
       active: ArcoSemanticDark.danger7,
       solidFill: ArcoSemanticDark.danger6,
       solidLabel: ArcoSemanticLight.text1,
+      onSubtle: ArcoPaletteDark.red6,
     ),
     borderSubtle: ArcoSemanticDark.border1,
     borderDefault: ArcoSemanticDark.border2,
@@ -375,6 +391,7 @@ class LumiereColors {
       active: ArcoSemanticLight.primary7,
       solidFill: ArcoSemanticLight.primary6,
       solidLabel: ArcoSemanticLight.bgWhite,
+      onSubtle: ArcoPaletteLight.primary6,
     ),
     success: LumiereStatusColors(
       subtle: ArcoSemanticLight.success1,
@@ -385,6 +402,7 @@ class LumiereColors {
       active: ArcoSemanticLight.success7,
       solidFill: ArcoSemanticLight.success6,
       solidLabel: ArcoSemanticLight.text1,
+      onSubtle: ArcoPaletteLight.green8,
     ),
     warning: LumiereStatusColors(
       subtle: ArcoSemanticLight.warning1,
@@ -395,6 +413,7 @@ class LumiereColors {
       active: ArcoSemanticLight.warning7,
       solidFill: ArcoSemanticLight.warning6,
       solidLabel: ArcoSemanticLight.text1,
+      onSubtle: ArcoPaletteLight.orange8,
     ),
     danger: LumiereStatusColors(
       subtle: ArcoSemanticLight.danger1,
@@ -406,6 +425,7 @@ class LumiereColors {
       // White, not dark ink: on danger.7 the ink measures 2.97 and white 5.43.
       solidFill: ArcoSemanticLight.danger7,
       solidLabel: ArcoSemanticLight.bgWhite,
+      onSubtle: ArcoPaletteLight.red7,
     ),
     borderSubtle: ArcoSemanticLight.border1,
     borderDefault: ArcoSemanticLight.border2,

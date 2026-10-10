@@ -18,11 +18,13 @@
 //    a pair, read from `LumiereStatusColors`, so the pairing is a verifiable
 //    property of the system and not only a row of this table.
 //
-// The exception register of section 8 is encoded, never bypassed. AE-08 and
-// AE-11 are open: the test asserts that the combinations they cover still fail
-// with their recorded value, so closing them in the palette turns this file red
-// and tells us to delete the entry. AE-09 and AE-10 are permanent by design and
-// are recorded without a threshold.
+// The exception register of section 8 is encoded, never bypassed. AE-09, AE-10 and
+// AE-11 are permanent by design: the test records their values without asserting a
+// threshold, because the design decided they stay as they are. A new failure
+// cannot hide, because the test also checks that no combination outside the
+// register fails.
+// AE-08 is no longer an exception: the light text.3 token is darkened by a
+// declared override, and its new ratio is a recorded value like any other.
 //
 // The raw token layer is imported white-box because `lib/lumiere_ui.dart`
 // publishes the semantic roles, not the colours. That the roles point at these
@@ -138,13 +140,11 @@ const _Rule _solidLabel = _Rule('3.2', required: _normalText);
 const _Rule _overlayText = _Rule('3.2', required: _normalText);
 const _Rule _graphicIndicator = _Rule('3.4', required: _largeText);
 const _Rule _separator = _Rule('3.4', register: 'AE-10');
-const _Rule _text3Open = _Rule('3.1', required: _normalText, register: 'AE-08');
+const _Rule _text3 = _Rule('3.1', required: _normalText);
 const _Rule _text4Recorded = _Rule('3.1', register: 'AE-09');
-const _Rule _statusOpen = _Rule(
-  '3.3',
-  required: _normalText,
-  register: 'AE-11',
-);
+// Permanent by design since the families gained the onSubtle ink: the decorative
+// fills are never text, so their values are recorded without a threshold.
+const _Rule _statusRecorded = _Rule('3.3', register: 'AE-11');
 
 /// One combination the contract documents.
 @immutable
@@ -239,7 +239,7 @@ final List<_Pair> _pairs = <_Pair>[
   _dark('text.4', 'bg.1', 2.71, _text4Recorded),
   _light('text.1', 'bg.1', 16.13, _pageText),
   _light('text.2', 'bg.1', 7.10, _pageText),
-  _light('text.3', 'bg.1', 3.24, _text3Open),
+  _light('text.3', 'bg.1', 4.68, _text3),
   _light('text.4', 'bg.1', 1.59, _text4Recorded),
 
   // Section 3.1: the container backgrounds. The contract records text.1 and
@@ -317,9 +317,9 @@ final List<_Pair> _pairs = <_Pair>[
 
   // Section 3.3: the status inks on their own subtle background. AE-11 records
   // the light failures at step 6.
-  _light('success.6', 'success.1', 2.63, _statusOpen),
-  _light('warning.6', 'warning.1', 2.41, _statusOpen),
-  _light('danger.6', 'danger.1', 3.25, _statusOpen),
+  _light('success.6', 'success.1', 2.63, _statusRecorded),
+  _light('warning.6', 'warning.1', 2.41, _statusRecorded),
+  _light('danger.6', 'danger.1', 3.25, _statusRecorded),
 ];
 
 /// One entry of the section 8 exception register.
@@ -355,25 +355,16 @@ class _RegisteredException {
 /// Section 8, as the level 1 test has to encode it.
 const List<_RegisteredException> _exceptions = <_RegisteredException>[
   _RegisteredException(
-    id: 'AE-08',
-    lowest: 3.24,
-    highest: 3.24,
-    reason:
-        'Open, needs design: in the light theme text.3 reaches only 3.24 on '
-        'the page background, so it is allowed at 24px and above until the '
-        'tone is darkened.',
-    open: true,
-    combinations: <String>['light text.3 on bg.1'],
-  ),
-  _RegisteredException(
     id: 'AE-11',
     lowest: 2.41,
     highest: 3.25,
     reason:
-        'Open, needs design: in the light theme the status inks at step 6 '
-        'measure 2.41 to 3.25 on their own subtle background, so an '
-        'informational tag uses step 7.',
-    open: true,
+        'Permanent by design: the decorative fills at step 6 measure 2.41 to '
+        '3.25 on their own subtle background, so they are never used as text. '
+        'Each family carries an onSubtle ink for that, which the status ink '
+        'test asserts at 4.5:1. These values stay recorded because reaching '
+        'for the fill instead of the ink is still wrong.',
+    open: false,
     combinations: <String>[
       'light success.6 on success.1',
       'light warning.6 on warning.1',
