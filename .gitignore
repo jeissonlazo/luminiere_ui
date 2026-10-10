@@ -18,3 +18,7 @@ coverage/
 # Sistema operativo
 .DS_Store
 Thumbs.db
+
+# Failure artefacts written when a golden test fails. The baseline lives in
+# test/golden/goldens and is the only image that gets committed.
+test/golden/failures/
