@@ -1,0 +1,47 @@
+# Files excluded from the published archive.
+#
+# `.pubignore` takes precedence over `.gitignore` when pub collects the files
+# for `pub publish`, so the rules of `.gitignore` are repeated here and the
+# gallery is added to them. Keeping the two in step matters: a rule that lived
+# only in `.gitignore` would silently stop applying to the archive.
+#
+# The gallery under `showcase/` is the visual documentation of this package. It
+# is a Flutter web application carrying one golden baseline per page and per
+# theme, which is most of a 3 MB archive that a consumer of the library has no
+# use for. It stays in the repository and is published to GitHub Pages instead;
+# see `showcase/README.md`.
+
+# Dart / Flutter
+.dart_tool/
+.packages
+build/
+
+# A library does not fix versions for its consumers: the lockfile is not
+# published.
+pubspec.lock
+
+# Coverage
+coverage/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Failure artefacts written when a golden test fails.
+test/golden/failures/
+
+# Editor workspaces are local: they point at paths that only exist on one
+# machine.
+*.code-workspace
+
+# Local dependency overrides, used to point the gallery at a checkout of this
+# package that sits beside it.
+pubspec_overrides.yaml
+
+# The gallery itself.
+showcase/

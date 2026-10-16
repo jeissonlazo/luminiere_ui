@@ -1,0 +1,23 @@
+# Flutter/Dart build output.
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# The gallery is an application, not a library, so its lockfile is committed:
+# the published documentation should be built from the same versions every time.
+# The package's own .gitignore excludes every pubspec.lock, which is right for
+# the library and wrong for this directory, so it is re-included here.
+!pubspec.lock
+
+# Local dependency overrides. Used when the gallery and the package are checked
+# out side by side instead of one inside the other.
+pubspec_overrides.yaml
+
+# Generated tooling leftovers.
+*.iml
+.idea/
+
+# Golden failure artefacts: the `failures/` directory the test runner writes
+# beside the baseline when an image does not match.
+test/**/failures/

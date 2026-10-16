@@ -6,6 +6,17 @@ It is independent of the application: it never imports the editor, the viewport,
 the domain or `flutter_gpu`. Its only visual input is the token layer and its
 only output is widgets.
 
+## Component gallery
+
+The components are documented, live, at
+<https://jeissonlazo.github.io/luminiere_ui/>: one page per component with its
+variants, its states and its API, plus the token foundations, in both themes.
+
+The gallery is a Flutter web application in `showcase/`, published by
+`.github/workflows/pages.yml`. It consumes this package through its single
+public entry point, exactly as an application does, so anything it can render an
+application can render too. See [`showcase/README.md`](showcase/README.md).
+
 ## Install
 
 ```yaml

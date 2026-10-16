@@ -1,0 +1,11 @@
+analyzer:
+  exclude:
+    - build/**
+    - web/**
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # Every page of the gallery is a private widget of this application, so the
+    # public API here is just `main`.
+    public_member_api_docs: false

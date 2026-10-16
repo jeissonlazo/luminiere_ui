@@ -1,0 +1,8 @@
+# Test tag declaration.
+#
+# `golden` groups the tests that rasterise a page to a reference image. They
+# depend on the operating system's rasterisation, so CI excludes them and the
+# baseline is produced locally.
+tags:
+  golden:
+    description: Reference image tests (operating system dependent).

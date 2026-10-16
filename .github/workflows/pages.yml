@@ -1,0 +1,91 @@
+name: Pages
+
+# Builds the component gallery in `showcase/` and publishes it to GitHub Pages.
+#
+# It runs when the gallery changes, and also when the package does: the gallery
+# renders the real components, so a change under `lib/` changes what the
+# published documentation shows. A stale gallery is worse than no gallery.
+#
+# One-time setup, without which the deploy job has nowhere to publish:
+#   Settings -> Pages -> Build and deployment -> Source: GitHub Actions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'showcase/**'
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a deployment in flight, but do not queue a second one either.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        working-directory: showcase
+        run: flutter pub get
+
+      # The same gate as the package's own CI. `showcase/pubspec.yaml` points at
+      # `../`, so the gallery is compiled against the package in this checkout
+      # and a breaking change to the package fails here.
+      - name: Static analysis
+        working-directory: showcase
+        run: flutter analyze
+
+      - name: Tests
+        working-directory: showcase
+        run: flutter test --exclude-tags=golden
+
+      - name: Build
+        working-directory: showcase
+        # Derived from the repository name, so renaming the repository does not
+        # silently break the asset paths.
+        run: >-
+          flutter build web --release
+          --base-href "/${{ github.event.repository.name }}/"
+
+      # Pages must be switched on once by hand, before the first deploy:
+      #   Settings -> Pages -> Build and deployment -> Source: GitHub Actions
+      #
+      # `actions/configure-pages` does accept an `enablement: true` input, and it
+      # looks like it would remove that click. It would not: the action's own
+      # documentation says the option "requires a token other than
+      # GITHUB_TOKEN". The default token used here cannot enable Pages, so
+      # setting it fails the run instead of removing the manual step. Doing it
+      # properly needs a personal access token stored as a secret, which is more
+      # setup than the one click it replaces.
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: showcase/build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
