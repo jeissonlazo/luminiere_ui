@@ -1,6 +1,13 @@
 analyzer:
   exclude:
     - build/**
+    # The gallery in `showcase/` is a package of its own with dependencies this
+    # one does not have (`lucide_icons_flutter`, and itself by name). `flutter
+    # analyze` walks into it from here and cannot resolve those imports on a
+    # fresh clone, which fails this package's CI. It is not left unverified:
+    # `.github/workflows/pages.yml` runs `flutter analyze` inside `showcase/`,
+    # where the dependencies are resolved.
+    - showcase/**
 include: package:flutter_lints/flutter.yaml
 
 linter:
