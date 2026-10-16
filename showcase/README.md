@@ -106,18 +106,21 @@ if the repository is renamed:
 flutter build web --release --base-href "/${repo}/"
 ```
 
-**One-time setup, and it has to be done by hand:** in the repository, *Settings
-→ Pages → Build and deployment → Source* must be set to **GitHub Actions**.
-Until then the workflow runs and the deploy job fails, because there is no Pages
-site to publish to. The repository is public, so Pages costs nothing.
+**The one-time setup is done.** Pages is enabled for this repository with
+*Settings → Pages → Build and deployment → Source* set to **GitHub Actions**, so
+what this workflow uploads is what gets served. Two things worth knowing before
+touching that screen again:
 
-`actions/configure-pages` has an `enablement: true` input that looks like it
-would remove that click, and the workflow deliberately does not use it: the
-action documents that the option *requires a token other than `GITHUB_TOKEN`*.
-The default token the workflow runs with cannot enable Pages, so setting it
-would fail the run rather than spare the click. Doing it that way needs a
-personal access token stored as a secret, which is more setup than the click it
-replaces.
+- **Do not pick a template from it.** The *GitHub Pages Jekyll* and *Static HTML*
+  cards create a second workflow that competes with this one, and neither can
+  build a Flutter application: *Static HTML* would publish the repository root,
+  which holds no `index.html`, and *Jekyll* would find no site to build.
+- `actions/configure-pages` has an `enablement: true` input that looks like it
+  would turn Pages on by itself, and this workflow deliberately does not use it:
+  the action documents that the option *requires a token other than
+  `GITHUB_TOKEN`*. The default token cannot enable Pages, so setting it fails the
+  run instead of helping. Doing it that way needs a personal access token in a
+  secret, which is more setup than the click it replaces.
 
 ## Known gaps
 
