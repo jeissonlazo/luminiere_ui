@@ -374,6 +374,21 @@ LumiereButton(
             ),
             const SizedBox(height: ArcoSpace.spaceMd),
             const Callout(
+              title: 'The loading indicator measures 1.41:1 against its fill',
+              body: 'isLoading also disables the button, so a primary button '
+                  'fills with accent.disabled (#0E32A6) and draws the indicator '
+                  'in accent.textDisabled (#041B79) - two adjacent dark steps. '
+                  'Measured, they are 1.41:1 apart in the dark theme and 1.31:1 '
+                  'in the light one, where graphical information that '
+                  'identifies a state is asked for 3:1. Even the brighter '
+                  'accent.normal would only reach 2.77:1 on that fill. '
+                  'Separately, the label is dropped while loading, so the same '
+                  'button narrows from 61 px to 47 px and moves whatever sits '
+                  'beside it.',
+              tone: CalloutTone.danger,
+            ),
+            const SizedBox(height: ArcoSpace.spaceMd),
+            const Callout(
               title: 'Hover, focus and pressed are not shown as pictures',
               body: 'They cannot be: they are states the widget enters. Move '
                   'the pointer over a button above, or tab into one, to see '

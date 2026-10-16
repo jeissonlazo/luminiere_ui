@@ -175,6 +175,18 @@ LumiereButton(label: 'Saving', isLoading: true, type: LumiereButtonType.secondar
                 ],
               ),
             ),
+            const SizedBox(height: ArcoSpace.spaceMd),
+            const Callout(
+              title: 'On a button, the indicator is drawn in the disabled ink',
+              body: 'isLoading disables the button, so the indicator takes '
+                  'accent.textDisabled and lands on the disabled fill. That '
+                  'pair measures 1.41:1 in the dark theme and 1.31:1 in the '
+                  'light one, against the 3:1 asked of graphical information '
+                  'that identifies a state, so the progress it reports is '
+                  'barely there. The Button page carries the measurement in '
+                  'full.',
+              tone: CalloutTone.danger,
+            ),
           ],
         ),
 
