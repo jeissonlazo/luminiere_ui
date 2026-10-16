@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../tokens/lumiere_tokens.dart';
+import '../loading/lumiere_loading.dart';
 import '../../tokens/tokens.g.dart';
 
 /// Visual weight of the button.
@@ -277,14 +278,9 @@ class LumiereButton extends StatelessWidget {
     final Color iconColor = _isEnabled ? ramp.normal : ramp.textDisabled;
 
     if (isLoading) {
-      return SizedBox(
-        width: iconSize,
-        height: iconSize,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(iconColor),
-        ),
-      );
+      // The design system draws its own indicator instead of borrowing the one
+      // Material ships, so the button keeps its look when Material changes.
+      return LumiereLoading(size: iconSize, color: iconColor);
     }
 
     if (leadingIcon == null && trailingIcon == null) {

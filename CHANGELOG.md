@@ -3,6 +3,40 @@
 All notable changes to this package are documented here.
 Format based on Keep a Changelog; versioning follows Semantic Versioning.
 
+## 0.6.0
+
+### Added
+
+- `LumiereDivider`: the orientation, dashed, label and alignment axes of the
+  `Divider` component. The alignment keeps a line on both sides of the label, with
+  the short one of 20 px on the side the label sits, which is what the file
+  measures. It carries no margin on purpose: the space around a separator belongs
+  to the layout that places it, not to the separator.
+- `LumiereLoading`: the `Loading` component, a single 40 by 40 vector with no axis
+  of its own. The size is a parameter because the button draws it smaller.
+- `LumiereStrokes`: the hairline, the dash and the gap the components read instead
+  of writing a literal. The hairline is measured; the dash metrics are the values
+  the button already used and are recorded as pending.
+
+### Changed (breaking)
+
+- The button no longer borrows Material's `CircularProgressIndicator`: its loading
+  state draws `LumiereLoading`, so its look no longer follows Material's.
+- The small switch handle is 12 px and not 10, measured in the project file. Its
+  travel and its inset follow from that: the inset is half of what the height
+  leaves.
+- The tag draws its close glyph at half its height, measured at 12 in a 24 tag, and
+  its small step uses the 14 px text the file declares rather than 12.
+- `lib/lumiere_ui.dart` publishes the token layer with an explicit show list, so
+  what the design system exposes is stated rather than implied.
+
+### Notes
+
+- Every value above comes from a measurement in the project file, taken with the
+  API quota of this round. The alignment semantics of the divider, which were an
+  interpretation in the previous version, are confirmed: only `none` carries no
+  lines. What is still unmeasured is recorded in the pending list.
+
 ## 0.5.0
 
 ### Changed (breaking)

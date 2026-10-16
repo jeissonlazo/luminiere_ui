@@ -44,7 +44,7 @@ void main() {
         )),
       );
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(LumiereLoading), findsOneWidget);
       await tester.tap(find.byType(LumiereButton), warnIfMissed: false);
 
       expect(taps, 0);

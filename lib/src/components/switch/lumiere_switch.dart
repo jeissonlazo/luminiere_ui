@@ -68,7 +68,9 @@ abstract final class _SwitchGeometry {
   /// Handle of `circle` and `rectangle`: layer `group:Thumb` / `rectangle:Thumb
   /// (style)` at 16 x 16, and 10 x 10 for the small size.
   static const double handleSize = 16;
-  static const double handleSizeSmall = 10;
+  // Measured in the project file: the small track is 28x16 and its handle is
+  // 12x12, not the 10 the upstream Sketch showed.
+  static const double handleSizeSmall = 12;
 
   /// `line`: the track is 36 x 6 for `default` and 28 x 4 for `small`, the
   /// handle is the 20 x 20 layer `shapePath:thumb` for both sizes.

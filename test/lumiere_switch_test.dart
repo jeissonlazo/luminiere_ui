@@ -235,7 +235,9 @@ void main() {
 
       expect(small.metrics.trackWidth, 28);
       expect(small.metrics.trackHeight, 16);
-      expect(small.metrics.handleSize, 10);
+      // Measured in the project file: 12 on a 28x16 track, where the upstream
+      // Sketch showed 10.
+      expect(small.metrics.handleSize, 12);
 
       expect(line.metrics.trackWidth, 36);
       expect(line.metrics.trackHeight, 6);
@@ -275,8 +277,9 @@ void main() {
       // leaves the box.
       expect(_painterOf(tester, index: 0).handleLeft, 4);
       expect(_painterOf(tester, index: 1).handleLeft, 20);
-      expect(_painterOf(tester, index: 2).handleLeft, 3);
-      expect(_painterOf(tester, index: 3).handleLeft, 15);
+      // The inset is half of what the height leaves: (16 - 12) / 2.
+      expect(_painterOf(tester, index: 2).handleLeft, 2);
+      expect(_painterOf(tester, index: 3).handleLeft, 14);
       expect(_painterOf(tester, index: 4).handleLeft, 0);
       expect(_painterOf(tester, index: 5).handleLeft, 16);
     });

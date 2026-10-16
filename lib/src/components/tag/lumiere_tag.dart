@@ -77,12 +77,15 @@ class LumiereTag extends StatelessWidget {
         LumiereTagSize.mini => ArcoTag.heightMini,
       };
 
-  /// Text size per step. The type scale is the design's; which step pairs with
-  /// which tag size is pending confirmation, so the pairing stays inside the
-  /// declared scale.
+  /// Text size per step. Measured: the small tag is 24 high and its text is 22,
+  /// which is the line height the type scale pairs with 14. Mini is the one step
+  /// whose text size is not measured yet, and it stays inside the declared scale.
   double get _fontSize => switch (size) {
-        LumiereTagSize.large || LumiereTagSize.medium => ArcoType.size14,
-        LumiereTagSize.small || LumiereTagSize.mini => ArcoType.size12,
+        LumiereTagSize.large ||
+        LumiereTagSize.medium ||
+        LumiereTagSize.small =>
+          ArcoType.size14,
+        LumiereTagSize.mini => ArcoType.size12,
       };
 
   bool get _hasBackground => filled || bordered;
@@ -159,7 +162,9 @@ class _CloseAction extends StatelessWidget {
         // Keeps the focus indicator visible, which the accessibility contract
         // requires for every focusable control.
         focusColor: LumiereTokens.of(context).colors.fillStrong,
-        child: Icon(Icons.close, size: size * 0.58, color: color),
+        // Measured: the design draws the close glyph at 12 in a 24 tag, half its
+        // height.
+        child: Icon(Icons.close, size: size * 0.5, color: color),
       ),
     );
   }

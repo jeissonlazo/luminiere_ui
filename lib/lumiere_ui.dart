@@ -10,12 +10,22 @@
 library;
 
 export 'src/components/button/lumiere_button.dart';
+export 'src/components/divider/lumiere_divider.dart';
+export 'src/components/loading/lumiere_loading.dart';
 export 'src/components/checkbox/lumiere_checkbox.dart';
 export 'src/components/radio/lumiere_radio.dart';
 export 'src/components/switch/lumiere_switch.dart';
 export 'src/components/tag/lumiere_tag.dart';
 export 'src/theme/lumiere_theme.dart';
-export 'src/tokens/lumiere_tokens.dart';
+export 'src/tokens/lumiere_tokens.dart'
+    show
+        LumiereColors,
+        LumiereRamp,
+        LumiereStatusColors,
+        LumiereStrokes,
+        LumiereTagColor,
+        LumiereTagColorName,
+        LumiereTokens;
 
 // Mode-independent scales are safe to expose: they are the same in light and
 // dark. The raw colour layers are not exported on purpose, so colours can only

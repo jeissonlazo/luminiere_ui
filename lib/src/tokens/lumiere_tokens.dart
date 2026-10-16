@@ -110,6 +110,26 @@ class LumiereStatusColors {
       );
 }
 
+/// Stroke widths of the design system.
+///
+/// They are not spacing: no scale governs a hairline, so they live here as
+/// semantic values and every component reads them instead of writing a literal.
+///
+/// The hairline is measured: the design draws its separators as one pixel, both
+/// in the project file and in the upstream kit, where they appear as effects with
+/// a one pixel offset. The dash metrics are not declared anywhere in the design, so
+/// they are the values the button already used, kept consistent and recorded as
+/// pending confirmation in the pending list.
+@immutable
+abstract final class LumiereStrokes {
+  /// Thickness of a separator or a border line.
+  static const double hairline = 1;
+
+  /// Length of a dash and of the gap after it, in a dashed line.
+  static const double dash = 4;
+  static const double gap = 3;
+}
+
 /// The colours the design file offers for a tag.
 ///
 /// The names are the design's own and are kept untranslated in code because they
