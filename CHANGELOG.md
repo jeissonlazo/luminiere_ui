@@ -3,6 +3,47 @@
 All notable changes to this package are documented here.
 Format based on Keep a Changelog; versioning follows Semantic Versioning.
 
+## 0.7.0
+
+### Changed (breaking)
+
+- The declared family is `Mark Pro`, not `Nunito Sans`. `ArcoType.fontFamily` names
+  it, so every component and every style the theme builds for Material changed
+  typeface at once. The change was applied by hand to the generated token file,
+  because the generator is not in this repository (`OPEN-07`); regenerating without
+  carrying it reverts it, and the constant says so where it lands.
+- The family is now theme-scoped instead of a compile-time constant.
+  `LumiereTokens` carries a `fontFamily` field and `LumiereThemeData.dark()` and
+  `.light()` take an optional `fontFamily` whose default is `ArcoType.fontFamily`.
+  An application that registers another family no longer has to fork the package:
+  it passes the name and every component follows. Existing calls are unchanged.
+- The scale's `w600` no longer resolves to a semibold face. Mark Pro has ten cuts -
+  250 to 900 - and no 600, so `FontWeight.w600`, which is every heading in
+  `ArcoType.weights` and in the `TextTheme` mapping, is drawn with Bold (700). The
+  weight map keeps the design's requests and says what happens to them.
+
+### Added
+
+- `LumiereTokens.fontFamily`, with `copyWith`, `lerp`, `==` and `hashCode`, and
+  `test/lumiere_theme_test.dart`: the default, the override, the path from the theme
+  to the glyph a button paints, and each of the four members above.
+- The gallery declares and bundles the family, with the weight binding written down
+  in `showcase/pubspec.yaml`; its baselines are regenerated with the real typeface
+  instead of a substitute.
+
+### Notes
+
+- The typeface is licensed and is redistributed with neither this package nor its
+  archive: the gallery keeps its own copy outside the published files, and every
+  consumer supplies its own. See `specs/04-integration/consuming.md`.
+- The line heights were not re-measured. The scale pairs each size with an absolute
+  value measured against the previous family; Mark Pro asks for 1.268 em of leading
+  of its own, which is tighter than 56/64 and looser than 10/18. Recorded as
+  `OPEN-27` rather than presented as a verified pairing.
+- 400 is bound to `Book` (the family's reading weight, 450 in its own table) and not
+  to the face named `Regular`, which is lighter. The binding is one line in the
+  gallery's `pubspec.yaml` and is recorded as `OPEN-26`.
+
 ## 0.6.0
 
 ### Added

@@ -44,22 +44,74 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # The design declares `Nunito Sans` as the family. It is NOT bundled here,
-  # for the same reason the package does not bundle it: the typeface is an
-  # application concern and it is not redistributed with the library. Text
-  # therefore falls back to the platform default until it is added, which is
-  # the state the product itself is in.
+  # `Mark Pro` is the family the design system declares and the one
+  # `ArcoType.fontFamily` names. It is NOT redistributed with the package: it is a
+  # commercial typeface, so the library stays typeface-agnostic and every consumer
+  # supplies its own licensed copy (see `specs/04-integration/consuming.md`).
   #
-  # To add it, drop the four static instances in `fonts/` and uncomment:
+  # The gallery does bundle it, because a component gallery whose specimens render
+  # in a fallback face documents nothing. The faces live in `fonts/MarkPro/`.
   #
-  # fonts:
-  #   - family: Nunito Sans
-  #     fonts:
-  #       - asset: fonts/NunitoSans-Regular.ttf
-  #         weight: 400
-  #       - asset: fonts/NunitoSans-Medium.ttf
-  #         weight: 500
-  #       - asset: fonts/NunitoSans-SemiBold.ttf
-  #         weight: 600
-  #       - asset: fonts/NunitoSans-Bold.ttf
-  #         weight: 700
+  # THE WEIGHTS BELOW ARE NOT THE ONES THE FILES DECLARE. Each file carries a
+  # weight of its own in its `OS/2` table - 250 Hairline, 275 Thin, 300 ExtraLight,
+  # 350 Light, 400 Regular, 450 Book, 500 Medium, 700 Bold, 800 Heavy, 900 Black -
+  # and Flutter accepts only the nine hundred steps, so ten cuts are pressed into
+  # nine slots. The binding chosen:
+  #
+  #   100 Hairline      500 Medium
+  #   200 ExtraLight    700 Bold
+  #   300 Light         800 Heavy
+  #   400 Book          900 Black
+  #
+  # Two consequences, deliberate and recorded as OPEN-26:
+  #
+  #  * No 600. The family has no semibold, so every `FontWeight.w600` in the type
+  #    scale - which is every heading, per the design's own weight map - renders in
+  #    Bold. Nothing is synthesized.
+  #  * 400 is bound to Book (450), the family's reading weight, and not to the face
+  #    named Regular (400), which is lighter than Book. `MarkPro.otf` and
+  #    `MarkPro-Thin.otf` therefore ship but are not declared; bind 400 to
+  #    `MarkPro.otf` instead if the design wants the lighter cut.
+  fonts:
+    - family: Mark Pro
+      fonts:
+        - asset: fonts/MarkPro/MarkPro-Hairline.otf
+          weight: 100
+        - asset: fonts/MarkPro/MarkPro-HairlineItalic.otf
+          weight: 100
+          style: italic
+        - asset: fonts/MarkPro/MarkPro-ExtraLight.otf
+          weight: 200
+        - asset: fonts/MarkPro/MarkPro-ExtraLightItalic.otf
+          weight: 200
+          style: italic
+        - asset: fonts/MarkPro/MarkPro-Light.otf
+          weight: 300
+        - asset: fonts/MarkPro/MarkPro-LightItalic.otf
+          weight: 300
+          style: italic
+        - asset: fonts/MarkPro/MarkPro-Book.otf
+          weight: 400
+        - asset: fonts/MarkPro/MarkPro-BookItalic.otf
+          weight: 400
+          style: italic
+        - asset: fonts/MarkPro/MarkPro-Medium.otf
+          weight: 500
+        - asset: fonts/MarkPro/MarkPro-MediumItalic.otf
+          weight: 500
+          style: italic
+        - asset: fonts/MarkPro/MarkPro-Bold.otf
+          weight: 700
+        - asset: fonts/MarkPro/MarkPro-BoldItalic.otf
+          weight: 700
+          style: italic
+        - asset: fonts/MarkPro/MarkPro-Heavy.otf
+          weight: 800
+        - asset: fonts/MarkPro/MarkPro-HeavyItalic.otf
+          weight: 800
+          style: italic
+        - asset: fonts/MarkPro/MarkPro-Black.otf
+          weight: 900
+        - asset: fonts/MarkPro/MarkPro-BlackItalic.otf
+          weight: 900
+          style: italic

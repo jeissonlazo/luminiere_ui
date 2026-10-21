@@ -214,7 +214,9 @@ void main() {
       expect(ArcoRadius.radiusMd, 4);
       expect(ArcoRadius.radiusLg, 8);
 
-      expect(ArcoType.fontFamily, 'Nunito Sans');
+      // The family is the one scale a consumer replaces at the theme level; the
+      // constant is only the default. See INT-004 and lumiere_theme_test.dart.
+      expect(ArcoType.fontFamily, 'Mark Pro');
     });
 
     test('the control scale pairs every height with its padding', () {

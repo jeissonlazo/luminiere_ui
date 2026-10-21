@@ -45,3 +45,8 @@ pubspec_overrides.yaml
 
 # The gallery itself.
 showcase/
+
+# The normative specifications. They are written for the people who maintain and
+# consume this package from the repository, not for the archive: a consumer reads
+# the guarantees that matter to them through `README.md` and `04-integration/`.
+specs/

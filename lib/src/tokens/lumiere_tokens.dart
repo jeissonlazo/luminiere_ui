@@ -562,15 +562,30 @@ enum LumiereRamp { accent, success, warning, danger }
 /// Design tokens published through the theme.
 ///
 /// Colours are mode dependent, so they travel as a [ThemeExtension]. Scales that
-/// do not change with the mode (type, spacing, radius, control heights) are
-/// exposed as plain constants by [ArcoType], [ArcoSpace], [ArcoRadius] and
-/// [ArcoControl].
+/// do not change with the mode (spacing, radius, control heights) are exposed as
+/// plain constants by [ArcoSpace], [ArcoRadius] and [ArcoControl].
+///
+/// The family travels with the tokens because it is the one scale a consumer is
+/// expected to replace: the package declares [ArcoType.fontFamily] and ships no
+/// font file, so the application registers its own and names it here
+/// (`INT-004`). Everything else in [ArcoType] is a measured value of the design.
 @immutable
 class LumiereTokens extends ThemeExtension<LumiereTokens> {
-  const LumiereTokens({required this.colors, required this.brightness});
+  const LumiereTokens({
+    required this.colors,
+    required this.brightness,
+    this.fontFamily = ArcoType.fontFamily,
+  });
 
   final LumiereColors colors;
   final Brightness brightness;
+
+  /// Family every text style of this package is built with.
+  ///
+  /// It defaults to the family the design file declares. An application that
+  /// uses another one MUST register it in its `pubspec.yaml` under the same
+  /// name and pass that name to [LumiereThemeData.dark] or `.light`.
+  final String fontFamily;
 
   /// Tokens of the current theme.
   ///
@@ -596,7 +611,7 @@ class LumiereTokens extends ThemeExtension<LumiereTokens> {
   TextStyle text({required double size, FontWeight weight = FontWeight.w400}) {
     final double? lineHeight = ArcoType.lineHeightFor(size);
     return TextStyle(
-      fontFamily: ArcoType.fontFamily,
+      fontFamily: fontFamily,
       fontSize: size,
       height: lineHeight == null ? null : lineHeight / size,
       fontWeight: weight,
@@ -605,10 +620,15 @@ class LumiereTokens extends ThemeExtension<LumiereTokens> {
   }
 
   @override
-  LumiereTokens copyWith({LumiereColors? colors, Brightness? brightness}) =>
+  LumiereTokens copyWith({
+    LumiereColors? colors,
+    Brightness? brightness,
+    String? fontFamily,
+  }) =>
       LumiereTokens(
         colors: colors ?? this.colors,
         brightness: brightness ?? this.brightness,
+        fontFamily: fontFamily ?? this.fontFamily,
       );
 
   @override
@@ -619,6 +639,9 @@ class LumiereTokens extends ThemeExtension<LumiereTokens> {
     return LumiereTokens(
       colors: LumiereColors._lerp(colors, other.colors, t),
       brightness: t < 0.5 ? brightness : other.brightness,
+      // A family name is not interpolable: it switches at the midpoint, as the
+      // brightness does.
+      fontFamily: t < 0.5 ? fontFamily : other.fontFamily,
     );
   }
 
@@ -626,8 +649,9 @@ class LumiereTokens extends ThemeExtension<LumiereTokens> {
   bool operator ==(Object other) =>
       other is LumiereTokens &&
       other.colors == colors &&
-      other.brightness == brightness;
+      other.brightness == brightness &&
+      other.fontFamily == fontFamily;
 
   @override
-  int get hashCode => Object.hash(colors, brightness);
+  int get hashCode => Object.hash(colors, brightness, fontFamily);
 }

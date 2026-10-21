@@ -10,65 +10,113 @@ import 'package:flutter_test/flutter_test.dart';
 /// box per glyph. A baseline like that cannot be reviewed, which defeats the
 /// point of keeping one.
 ///
-/// Two families are needed:
+/// Three families are needed:
 ///
-/// * The family the design declares. `lumiere_ui` sets `Nunito Sans` and
-///   deliberately redistributes no typeface, and this environment has no
-///   network to fetch one. The Roboto instances that ship inside the Flutter
-///   SDK are therefore registered under the declared family name. That makes
-///   the layout and the type scale reviewable; it does **not** turn the
-///   baseline into a check of Nunito Sans itself.
+/// * `Mark Pro`, the family the design system declares. The gallery declares it
+///   in `pubspec.yaml` and the faces live in `fonts/MarkPro/`; they are loaded
+///   here explicitly anyway, because a baseline that depends on the asset bundle
+///   being populated is a baseline that fails for a reason unrelated to the
+///   layout it verifies. This loader reads the same files the manifest names, so
+///   the test and the application see the same faces - including the weight the
+///   family does not have.
 /// * `Lucide`, the icon family. The gallery receives its icons from the
 ///   application, and the dependency's own asset is in the test bundle.
 /// * `monospace`, which the gallery uses for code and for rule identifiers.
-///   The platform resolves it in a browser; the test environment does not, so
-///   a real monospace face is registered under that name when one can be
-///   found. Without it every code block in the baseline is a row of boxes.
+///   The platform resolves it in a browser; the test environment does not, so a
+///   real monospace face is registered under that name when one can be found.
+///   Without it every code block in the baseline is a row of boxes.
+///
+/// A missing face is not fatal: the loader reports it and the baseline degrades
+/// to boxes, which a reviewer sees rather than trusting silently.
 Future<void> loadGalleryFonts() async {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final ByteData roboto = await _loadDesignFamily();
+  final ByteData? markPro = await _loadMarkProFamily();
   await _loadIconFamily();
-  await _loadMonospaceFamily(roboto);
+  await _loadMonospaceFamily(markPro);
 }
 
-Future<ByteData> _loadDesignFamily() async {
-  final String? root = Platform.environment['FLUTTER_ROOT'];
-  if (root == null) {
-    debugPrint('loadGalleryFonts: FLUTTER_ROOT is unset; text will be boxes.');
-    return ByteData(0);
-  }
+/// Directory of the faces, relative to the package root that `flutter test`
+/// uses as its working directory.
+const String _markProDirectory = 'fonts/MarkPro';
 
-  final Directory directory = Directory('$root/bin/cache/artifacts/material_fonts');
+/// The family name the manifest declares. It must match `ArcoType.fontFamily`.
+const String _markProFamily = 'Mark Pro';
+
+/// The faces the gallery uses, in the same set `pubspec.yaml` declares.
+///
+/// A curated list rather than a directory scan, because [FontLoader] cannot
+/// assign a weight: it registers the bytes and the engine reads the weight from
+/// each face's own `OS/2` table, where Book is 450 and the face named Regular is
+/// 400. The manifest can only name hundred steps, and it binds 400 to Book - so
+/// leaving `MarkPro.otf` out of this list is what makes a `FontWeight.w400`
+/// resolve to the same face here as in the application.
+///
+/// The two paths still differ by one slot at the extremes (the manifest presses
+/// ten cuts into nine hundred steps), which the type scale never reaches: it uses
+/// 400, 500, 600 and 700, and the first three of those resolve identically here
+/// and in the gallery.
+const List<String> _markProFaces = <String>[
+  'MarkPro-Hairline.otf',
+  'MarkPro-HairlineItalic.otf',
+  'MarkPro-ExtraLight.otf',
+  'MarkPro-ExtraLightItalic.otf',
+  'MarkPro-Light.otf',
+  'MarkPro-LightItalic.otf',
+  'MarkPro-Book.otf',
+  'MarkPro-BookItalic.otf',
+  'MarkPro-Medium.otf',
+  'MarkPro-MediumItalic.otf',
+  'MarkPro-Bold.otf',
+  'MarkPro-BoldItalic.otf',
+  'MarkPro-Heavy.otf',
+  'MarkPro-HeavyItalic.otf',
+  'MarkPro-Black.otf',
+  'MarkPro-BlackItalic.otf',
+];
+
+/// Registers the declared faces of the family, and returns the text face for use
+/// as a last-resort fallback by the monospace loader.
+Future<ByteData?> _loadMarkProFamily() async {
+  final Directory directory = Directory(_markProDirectory);
   if (!directory.existsSync()) {
-    debugPrint('loadGalleryFonts: no material_fonts at ${directory.path}.');
-    return ByteData(0);
+    debugPrint(
+      'loadGalleryFonts: no $_markProDirectory; text will be boxes. The family '
+      'is licensed and is not redistributed - see showcase/README.md.',
+    );
+    return null;
   }
 
-  // Four weights, so a semibold specimen does not fall back to regular.
-  const List<String> faces = <String>[
-    'roboto-regular.ttf',
-    'roboto-medium.ttf',
-    'roboto-bold.ttf',
-    'roboto-black.ttf',
-  ];
-
-  final FontLoader loader = FontLoader('Nunito Sans');
-  ByteData? regular;
-  bool loaded = false;
-  for (final String face in faces) {
-    final File file = File('${directory.path}/$face');
-    if (!file.existsSync()) {
+  final FontLoader loader = FontLoader(_markProFamily);
+  ByteData? fallback;
+  int loaded = 0;
+  for (final String name in _markProFaces) {
+    final File face = File('$_markProDirectory/$name');
+    if (!face.existsSync()) {
+      debugPrint('loadGalleryFonts: missing face $name.');
       continue;
     }
-    final ByteData bytes = ByteData.sublistView(file.readAsBytesSync());
+    final ByteData bytes = ByteData.sublistView(face.readAsBytesSync());
     loader.addFont(Future<ByteData>.value(bytes));
-    regular ??= bytes;
-    loaded = true;
+    loaded++;
+    // The reading weight is what a missing weight should fall back to.
+    if (name == 'MarkPro-Book.otf') {
+      fallback = bytes;
+    }
   }
-  if (loaded) {
-    await loader.load();
+
+  if (loaded == 0) {
+    debugPrint('loadGalleryFonts: $_markProDirectory holds none of the faces.');
+    return null;
   }
-  return regular ?? ByteData(0);
+  await loader.load();
+
+  if (fallback == null) {
+    debugPrint(
+      'loadGalleryFonts: MarkPro-Book.otf is missing, so the monospace fallback '
+      'has no face to borrow.',
+    );
+  }
+  return fallback;
 }
 
 /// Candidate monospace faces, by platform. The first one that exists wins.
@@ -80,7 +128,7 @@ const List<String> _monospaceCandidates = <String>[
   '/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf',
 ];
 
-Future<void> _loadMonospaceFamily(ByteData fallback) async {
+Future<void> _loadMonospaceFamily(ByteData? fallback) async {
   ByteData? face;
 
   for (final String path in _monospaceCandidates) {
@@ -97,9 +145,7 @@ Future<void> _loadMonospaceFamily(ByteData fallback) async {
       'loadGalleryFonts: no monospace face found; code blocks will fall back '
       'and lose their alignment.',
     );
-    if (fallback.lengthInBytes > 0) {
-      face = fallback;
-    }
+    face = fallback;
   }
 
   if (face == null) {

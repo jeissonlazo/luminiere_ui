@@ -12,14 +12,33 @@ import '../tokens/tokens.g.dart';
 /// Material's `visualDensity` is deliberately left at its default: control sizes
 /// are decided by the design tokens, not by Material. A theme-level density
 /// would silently shrink every token-driven control.
+///
+/// The typeface is the one parameter a consumer is expected to change. The
+/// package declares [ArcoType.fontFamily] and redistributes no font file, so an
+/// application registers its own family in `pubspec.yaml` and names it here:
+///
+/// ```dart
+/// theme: LumiereThemeData.dark(fontFamily: 'My Family'),
+/// ```
+///
+/// The name MUST be the one the application declared, not the name inside the
+/// font file. A family the engine cannot resolve falls back to the platform
+/// default without an error, which is why the family is worth asserting in a
+/// test of the consuming application.
 abstract final class LumiereThemeData {
   /// Dark theme, the default of the product.
-  static ThemeData dark() => _build(LumiereColors.dark, Brightness.dark);
+  static ThemeData dark({String fontFamily = ArcoType.fontFamily}) =>
+      _build(LumiereColors.dark, Brightness.dark, fontFamily);
 
   /// Light theme.
-  static ThemeData light() => _build(LumiereColors.light, Brightness.light);
+  static ThemeData light({String fontFamily = ArcoType.fontFamily}) =>
+      _build(LumiereColors.light, Brightness.light, fontFamily);
 
-  static ThemeData _build(LumiereColors colors, Brightness brightness) {
+  static ThemeData _build(
+    LumiereColors colors,
+    Brightness brightness,
+    String fontFamily,
+  ) {
     final ColorScheme scheme =
         ColorScheme.fromSeed(
           seedColor: colors.accent.normal,
@@ -36,7 +55,7 @@ abstract final class LumiereThemeData {
         );
 
     TextStyle style(double size, FontWeight weight) => TextStyle(
-          fontFamily: ArcoType.fontFamily,
+          fontFamily: fontFamily,
           fontSize: size,
           height:
               (ArcoType.lineHeightFor(size) ?? size * 1.4) / size,
@@ -61,7 +80,11 @@ abstract final class LumiereThemeData {
         labelMedium: style(ArcoType.size12, FontWeight.w500),
       ),
       extensions: <ThemeExtension<dynamic>>[
-        LumiereTokens(colors: colors, brightness: brightness),
+        LumiereTokens(
+          colors: colors,
+          brightness: brightness,
+          fontFamily: fontFamily,
+        ),
       ],
     );
   }

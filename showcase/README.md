@@ -66,12 +66,13 @@ change.
 
 Two things are worth knowing about them:
 
-- **They are captured with substitute typefaces.** `lumiere_ui` declares
-  `Nunito Sans` and redistributes no font, so the baseline registers the Roboto
-  instances that ship inside the Flutter SDK under the declared family name, and
-  a system monospace face under `monospace`. This makes the layout and the type
-  scale reviewable. It does **not** make the baseline a check of Nunito Sans
-  itself - see `test/support/gallery_fonts.dart`.
+- **They are captured with the real typeface.** Since 0.7.0 the gallery declares and
+  bundles `Mark Pro` in `fonts/MarkPro/`, and `test/support/gallery_fonts.dart`
+  registers those same faces from disk, so a baseline shows the letterforms a user
+  sees rather than a substitute. The one caveat is the weight axis: `FontLoader`
+  cannot assign a weight, so a face is matched by the weight it declares about itself,
+  and the test loader deliberately omits `MarkPro.otf` to make `w400` resolve to the
+  same face the manifest binds it to. See `OPEN-26`.
 - **The loading indicator never settles.** It rotates for as long as it is
   mounted, so the tests advance time by a fixed step instead of using
   `pumpAndSettle`, which would never return.
@@ -124,10 +125,14 @@ touching that screen again:
 
 ## Known gaps
 
-- **The typeface is not bundled.** Text falls back to the platform default, which
-  is the state the product itself is in. The block to add Nunito Sans is
-  commented out in `pubspec.yaml`; dropping the static instances into `fonts/`
-  and uncommenting it is the whole change.
+- **The typeface is licensed, and the gallery is the only thing that carries it.**
+  `Mark Pro` lives in `fonts/MarkPro/` and is declared in `pubspec.yaml`, so the
+  gallery renders what a licensed consumer renders. It is not in the package and not
+  in the published archive, and a checkout that has no licence for it will fail to
+  build the gallery rather than fall back silently. A consumer supplies its own.
+- **The weight binding is a decision, not a measurement.** Ten family cuts are pressed
+  into Flutter's nine slots, so `w600` renders Bold and `400` is bound to `Book`
+  (`OPEN-26`).
 - **The URL does not reflect the page.** Navigation is in memory, so a deep link
   cannot be shared and a refresh returns to the overview. Adding hash routing
   would be a small change; it was left out because it needs a `404.html` shim to
@@ -138,4 +143,6 @@ touching that screen again:
 
 ## Licence
 
-MIT, as the package. The gallery bundles no typeface.
+MIT covers the gallery's code. The typeface in `fonts/MarkPro/` is **not** MIT and is
+not covered by the package's licence: it is bundled here under the project's own
+licence from the foundry, and it is excluded from the published archive.

@@ -63,7 +63,7 @@ abstract final class Catalog {
   ///
   /// `test/catalog_test.dart` reads `../pubspec.yaml` and fails when the two
   /// drift apart, so this cannot silently go stale.
-  static const String packageVersion = '0.6.0';
+  static const String packageVersion = '0.7.0';
 
   static const String repositoryUrl =
       'https://github.com/jeissonlazo/luminiere_ui';

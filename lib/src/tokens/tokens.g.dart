@@ -448,10 +448,22 @@ abstract final class ArcoComponentLight {
 
 /// Type scale of the design system.
 ///
-/// Family: Nunito Sans (latin). PingFang SC is the CJK
+/// Family: Mark Pro (latin). PingFang SC is the CJK
 /// companion defined by the design file and is not shipped by this package.
 abstract final class ArcoType {
-  static const String fontFamily = 'Nunito Sans';
+  /// Family declared by the design file.
+  ///
+  /// This is the default of the design system, not a constraint: the family is
+  /// theme-scoped, so a consumer passes its own to `LumiereThemeData.dark` or
+  /// `.light` and every component follows (see `INT-004`).
+  ///
+  /// The typeface itself is licensed and is redistributed with neither this
+  /// package nor its archive: the application supplies the files, registered
+  /// under exactly this family name.
+  // Hand-applied override: the design changed family to Mark Pro while the
+  // generator is not in this repository. Regenerating without carrying this
+  // change reverts it - see OPEN-07.
+  static const String fontFamily = 'Mark Pro';
 
   /// Sizes in logical pixels.
   static const double size10 = 10;
@@ -506,6 +518,11 @@ abstract final class ArcoType {
   }
 
   /// Weights actually used by the design file, keyed by "sizeN.wWWW".
+  ///
+  /// A weight here is a *request*, not a face. The declared family does not
+  /// carry a 600, so every `w600` entry below is drawn with the family's Bold
+  /// (700): the engine resolves a missing weight upward before it resolves it
+  /// downward. The map is kept as the design declares it - see OPEN-26.
   static const Map<String, FontWeight> weights = <String, FontWeight>{
   'size10.w400': FontWeight.w400,
   'size10.w600': FontWeight.w600,
@@ -539,6 +556,9 @@ abstract final class ArcoType {
   'size56.w600': FontWeight.w600,
   };
 }
+
+// Overrides applied in this class: fontFamily (design change to Mark Pro,
+// hand-applied because the generator is not in this repository - OPEN-07).
 
 /// Spacing scale.
 ///

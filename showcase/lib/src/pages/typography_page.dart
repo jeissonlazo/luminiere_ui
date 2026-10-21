@@ -89,13 +89,14 @@ class TypographyPage extends StatelessWidget {
 
         DocSection(
           title: 'Weights',
-          description: 'The four weights the scale uses. Not every size '
-              'declares all four: 14 px is the only one that reaches 700.',
+          description: 'The four weights the scale declares. The family has no '
+              'semibold, so w600 is drawn with Bold: the last two rows are the '
+              'same face, and nothing is synthesized.',
           children: <Widget>[
             ExampleCard(
               previewAlignment: Alignment.centerLeft,
               code: '''
-Text('Nunito Sans', style: tokens.text(
+Text('Mark Pro', style: tokens.text(
   size: ArcoType.size14,
   weight: FontWeight.w600,
 ))''',
@@ -106,7 +107,7 @@ Text('Nunito Sans', style: tokens.text(
                       in <(String, FontWeight)>[
                     ('w400 regular', FontWeight.w400),
                     ('w500 medium', FontWeight.w500),
-                    ('w600 semibold', FontWeight.w600),
+                    ('w600 -> bold', FontWeight.w600),
                     ('w700 bold', FontWeight.w700),
                   ])
                     Padding(
@@ -142,18 +143,18 @@ Text('Nunito Sans', style: tokens.text(
 
         DocSection(
           title: 'Family',
-          ruleId: 'DS-TYPE-011',
+          ruleId: 'DS-TYPE-001',
           children: <Widget>[
             const Callout(
-              title: 'This gallery does not bundle Nunito Sans',
-              body: 'The design declares Nunito Sans (latin) as the family, and '
-                  'it is an application concern rather than a library one: the '
-                  'package sets the family name but redistributes no typeface. '
-                  'Text here therefore falls back to the platform default, '
-                  'which is the state the product itself is in. Adding the four '
-                  'static instances under `fonts/` and declaring them in '
-                  '`pubspec.yaml` is the whole change; the comment in that file '
-                  'carries the block ready to uncomment.',
+              title: 'Mark Pro is licensed, and the package does not ship it',
+              body: 'The design declares Mark Pro (latin) as the family, and it '
+                  'is an application concern rather than a library one: the '
+                  'package sets the family name and redistributes no typeface. '
+                  'This gallery bundles its own licensed copy under '
+                  '`fonts/MarkPro/`, which stays out of the published archive. '
+                  'A consumer registers its own family in `pubspec.yaml` and '
+                  'passes the name to `LumiereThemeData.dark(fontFamily: ...)`; '
+                  'the declared family is only the default.',
               tone: CalloutTone.warning,
             ),
           ],
