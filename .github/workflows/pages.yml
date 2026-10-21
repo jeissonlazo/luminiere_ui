@@ -6,6 +6,13 @@ name: Pages
 # renders the real components, so a change under `lib/` changes what the
 # published documentation shows. A stale gallery is worse than no gallery.
 #
+# THE GALLERY NEEDS ITS TYPEFACE IN THE CHECKOUT. It declares `Mark Pro`, the
+# package redistributes no font file, and the faces are licensed: they live in
+# `showcase/fonts/MarkPro/` and must be committed for this job to build. A fork
+# without a licence does not get them and does not get a working deploy either -
+# it supplies its own family through `LumiereThemeData.dark(fontFamily: ...)` and
+# drops the declaration. See `specs/04-integration/consuming.md`.
+#
 # One-time setup, without which the deploy job has nowhere to publish:
 #   Settings -> Pages -> Build and deployment -> Source: GitHub Actions
 
@@ -13,6 +20,7 @@ on:
   push:
     branches: [main]
     paths:
+      # `showcase/**` covers `showcase/fonts/**`: a change to a face redeploys.
       - 'showcase/**'
       - 'lib/**'
       - 'pubspec.yaml'
@@ -34,6 +42,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Checked before `pub get`, so the failure names its cause. Without this,
+      # a checkout missing the faces fails inside the asset bundler with a
+      # message about a path and no mention of the licence that puts it there.
+      - name: Every declared face is present
+        working-directory: showcase
+        run: |
+          set -u
+          # Only the `asset:` declarations, never a path quoted in a comment, and
+          # without a trailing CR so a CRLF checkout cannot make the file test lie.
+          declared=$(sed -n 's/^[[:space:]]*-[[:space:]]*asset:[[:space:]]*\(fonts\/[^[:space:]]*\.otf\).*/\1/p' pubspec.yaml | tr -d '\r' | sort -u)
+          if [ -z "$declared" ]; then
+            echo "::error file=showcase/pubspec.yaml::No font asset is declared."
+            exit 1
+          fi
+          missing=0
+          total=0
+          for face in $declared; do
+            total=$((total + 1))
+            if [ ! -f "$face" ]; then
+              echo "::error file=showcase/pubspec.yaml::Declared face '$face' is missing from the checkout."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "Mark Pro is licensed and is not redistributed by the package."
+            echo "The faces belong in showcase/fonts/MarkPro/ and are committed"
+            echo "with the gallery. See specs/04-integration/consuming.md."
+            exit 1
+          fi
+          echo "$total declared faces present."
 
       - uses: subosito/flutter-action@v2
         with:
@@ -62,6 +101,36 @@ jobs:
         run: >-
           flutter build web --release
           --base-href "/${{ github.event.repository.name }}/"
+
+      # A declared font the build did not emit is a failure nothing else would
+      # report: the site would deploy and render in a fallback face, and the only
+      # sign would be the letterforms. So the artifact is inspected, not trusted.
+      - name: The typeface reached the bundle
+        working-directory: showcase
+        run: |
+          set -u
+          manifest=build/web/assets/FontManifest.json
+          if [ ! -f "$manifest" ]; then
+            echo "::error::The build produced no FontManifest.json."
+            exit 1
+          fi
+          if ! grep -q '"Mark Pro"' "$manifest"; then
+            echo "::error::The built bundle does not declare the 'Mark Pro' family."
+            exit 1
+          fi
+          missing=0
+          total=0
+          for face in $(sed -n 's/^[[:space:]]*-[[:space:]]*asset:[[:space:]]*\(fonts\/[^[:space:]]*\.otf\).*/\1/p' pubspec.yaml | tr -d '\r' | sort -u); do
+            total=$((total + 1))
+            if [ ! -f "build/web/assets/$face" ]; then
+              echo "::error::'$face' is declared but was not emitted to build/web/assets."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+          echo "$total faces declared, $total emitted, family present."
 
       # Pages must be switched on once by hand, before the first deploy:
       #   Settings -> Pages -> Build and deployment -> Source: GitHub Actions

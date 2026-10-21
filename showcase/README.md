@@ -107,6 +107,20 @@ if the repository is renamed:
 flutter build web --release --base-href "/${repo}/"
 ```
 
+**The typeface has to be in the checkout.** The gallery declares `Mark Pro`, the
+package ships no font, and the faces are licensed - so they are committed here, in
+`fonts/MarkPro/`, and a fork without a licence for them cannot build this workflow.
+The build does not rely on that being true by accident: two steps make it explicit.
+
+| Step | Fails when | Why it exists |
+| --- | --- | --- |
+| *Every declared face is present* | an `asset:` line in `pubspec.yaml` names a file the checkout does not have | `flutter pub get` would fail later, inside the asset bundler, with a message about a path and no mention of the licence that puts the file there |
+| *The typeface reached the bundle* | the built `FontManifest.json` has no `Mark Pro`, or a declared face was not emitted to `build/web/assets` | a font that is declared but not emitted deploys a site that renders in a fallback face, and nothing else would report it |
+
+Both are run against the real tree, in the passing and the failing direction, before
+being committed; the faces they check are the sixteen `pubspec.yaml` declares, not a
+hardcoded count, so adding a weight needs no change to the workflow.
+
 **The one-time setup is done.** Pages is enabled for this repository with
 *Settings → Pages → Build and deployment → Source* set to **GitHub Actions**, so
 what this workflow uploads is what gets served. Two things worth knowing before

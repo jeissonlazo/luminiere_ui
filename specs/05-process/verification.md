@@ -37,11 +37,19 @@ a pull request.
 | Workflow | Trigger | Steps |
 | --- | --- | --- |
 | [`ci.yml`](../../.github/workflows/ci.yml) | push to `main`, `pull_request` | `pub get`, `flutter analyze`, `flutter test --exclude-tags=golden`, `flutter pub publish --dry-run` |
-| [`pages.yml`](../../.github/workflows/pages.yml) | push to `main` on `showcase/**`, `lib/**`, `pubspec.yaml`, the workflow, plus `workflow_dispatch` | `pub get`, `flutter analyze`, `flutter test --exclude-tags=golden`, `flutter build web --release --base-href "/<repo>/"`, then configure, upload and deploy Pages |
+| [`pages.yml`](../../.github/workflows/pages.yml) | push to `main` on `showcase/**`, `lib/**`, `pubspec.yaml`, the workflow, plus `workflow_dispatch` | every declared typeface face is present, `pub get`, `flutter analyze`, `flutter test --exclude-tags=golden`, `flutter build web --release --base-href "/<repo>/"`, the typeface reached the bundle, then configure, upload and deploy Pages |
 
 Both run on `ubuntu-latest` with `channel: stable`. `pages.yml` has no
 `pull_request` trigger, so the gallery gates are only observed after merge, on
 `main`; Pages must be enabled once by hand with Source = GitHub Actions.
+
+`pages.yml` carries two gates that exist only because the gallery ships a licensed
+typeface the package does not: one before `pub get` that checks every `asset:` line in
+`showcase/pubspec.yaml` against the checkout, and one after the build that checks the
+`FontManifest.json` of the artifact for the family and every declared face against
+`build/web/assets`. The second is the one that matters: a font declared but not emitted
+deploys a site that renders in a fallback face, and no other test would say so. Both
+were exercised in the passing and the failing direction before being committed.
 
 The golden tag is declared in [`dart_test.yaml`](../../dart_test.yaml) and not
 skipped there. It is excluded by the `--exclude-tags=golden` flag and nothing else,
